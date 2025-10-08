@@ -42,3 +42,10 @@ bun dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+
+
+
+todos:
+- update oauth client ids in google cloud console once ready to go live
+- add a "Add a Before User Created" auth hook, to ensure supabase never creates non @youngmuslims.com user accounts

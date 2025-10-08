@@ -7,8 +7,6 @@ import { supabase } from '@/lib/supabase'
 interface AuthContextType {
   user: User | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -19,30 +17,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check active sessions and sets the user
+    const ALLOWED_DOMAIN = 'youngmuslims.com'
+
+    // Check active sessions and validate domain
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+      const user = session?.user
+
+      // Validate domain for existing sessions
+      if (user && !user.email?.endsWith(`@${ALLOWED_DOMAIN}`)) {
+        console.warn('User with invalid domain detected, signing out')
+        supabase.auth.signOut()
+        setUser(null)
+      } else {
+        setUser(user ?? null)
+      }
       setLoading(false)
     })
 
     // Listen for changes on auth state (sign in, sign out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      const user = session?.user
+
+      // Validate domain for new sessions
+      if (user && !user.email?.endsWith(`@${ALLOWED_DOMAIN}`)) {
+        console.warn('User with invalid domain attempted login, signing out')
+        supabase.auth.signOut()
+        setUser(null)
+      } else {
+        setUser(user ?? null)
+      }
       setLoading(false)
     })
 
     return () => subscription.unsubscribe()
   }, [])
-
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
-  }
-
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) throw error
-  }
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
@@ -50,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   )
