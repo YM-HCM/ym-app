@@ -71,11 +71,11 @@ export default function GoogleSignInButton({
       return
     }
 
-    // Initialize Google Identity Services
+    // Initialize Google Identity Services with ux_mode popup (not One Tap)
     window.google.accounts.id.initialize({
       client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
       callback: handleCredentialResponse,
-      use_fedcm_for_prompt: true,
+      ux_mode: 'popup', // Use popup instead of One Tap
       hosted_domain: ALLOWED_DOMAIN,
     })
 
@@ -88,7 +88,7 @@ export default function GoogleSignInButton({
       return
     }
 
-    // Programmatically trigger Google One-Tap or popup
+    // Trigger Google sign-in popup
     window.google.accounts.id.prompt()
   }
 
