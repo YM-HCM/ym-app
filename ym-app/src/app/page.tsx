@@ -11,8 +11,8 @@ export default function RootPage() {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        // User is logged in → redirect to dashboard
-        router.push('/dashboard')
+        // User is logged in → redirect to home
+        router.push('/home')
       } else {
         // User is not logged in → redirect to login
         router.push('/login')

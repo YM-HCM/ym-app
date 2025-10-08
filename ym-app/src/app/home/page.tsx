@@ -14,7 +14,8 @@ export default function HomePage() {
   const router = useRouter()
 
   const handleGoogleSuccess = () => {
-    router.push('/dashboard')
+    // On success, just reload the page to show logged-in state
+    router.refresh()
   }
 
   const handleGoogleError = (errorMessage: string) => {

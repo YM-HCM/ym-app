@@ -13,12 +13,12 @@ export default function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
-      router.push('/dashboard')
+      router.push('/home')
     }
   }, [user, loading, router])
 
   const handleGoogleSuccess = () => {
-    router.push('/dashboard')
+    router.push('/home')
   }
 
   const handleGoogleError = (errorMessage: string) => {
