@@ -6,12 +6,39 @@ import { useState } from 'react'
 
 const ALLOWED_DOMAIN = 'youngmuslims.com'
 
-// TODO: Replace 'any' types with proper TypeScript interfaces for Google Identity Services
-// This will fix build errors and improve type safety
+/* --- Minimal types for Google Identity Services we use --- */
+type CredentialResponse = {
+  credential: string
+  select_by?: string
+  clientId?: string
+}
+
+type InitializeOptions = {
+  client_id: string
+  callback: (response: CredentialResponse) => void
+  hosted_domain?: string
+}
+
+type RenderButtonOptions = {
+  type?: 'standard' | 'icon'
+  theme?: 'outline' | 'filled_blue' | 'filled_black'
+  size?: 'large' | 'medium' | 'small'
+  text?: 'continue_with' | 'signin_with' | 'signup_with'
+  shape?: 'rectangular' | 'pill' | 'circle' | 'square'
+  logo_alignment?: 'left' | 'center'
+}
+
 declare global {
   interface Window {
-    google: any
-    handleSignInWithGoogle: (response: any) => void
+    google?: {
+      accounts: {
+        id: {
+          initialize: (opts: InitializeOptions) => void
+          renderButton: (el: HTMLElement | null, opts?: RenderButtonOptions) => void
+        }
+      }
+    }
+    handleSignInWithGoogle: (response: CredentialResponse) => void
   }
 }
 
@@ -24,59 +51,61 @@ export default function GoogleSignInButton({
   onSuccess,
   onError
 }: GoogleSignInButtonProps) {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const handleSignInWithGoogle = async (response: any) => {
+  const handleSignInWithGoogle = async (response: CredentialResponse) => {
     setIsLoading(true)
     try {
-      // Decode the JWT to check the email domain before sending to Supabase
-      const payload = JSON.parse(atob(response.credential.split('.')[1]))
+      // Decode the JWT to check the email domain (UX only; enforce on server)
+      const payloadPart = response.credential.split('.')[1] ?? ''
+      const payloadJson = atob(payloadPart)
+      const payload = JSON.parse(payloadJson) as { email?: string }
 
-      // TODO: Move domain validation to server-side (API route or Supabase Auth Hook)
-      // Client-side validation can be bypassed - this is only for UX
-      // Verify email domain
       if (!payload.email?.endsWith(`@${ALLOWED_DOMAIN}`)) {
-        const errorMsg = `Access restricted to @${ALLOWED_DOMAIN} accounts only`
-        onError?.(errorMsg)
-        setIsLoading(false)
+        const msg = `Access restricted to @${ALLOWED_DOMAIN} accounts only`
+        onError?.(msg)
         return
       }
 
-      // Sign in with Supabase using the ID token
       const { data, error } = await supabase.auth.signInWithIdToken({
         provider: 'google',
-        token: response.credential,
+        token: response.credential
       })
 
       if (error) throw error
 
+      // success
+      // eslint-disable-next-line no-console
       console.log('Successfully logged in with Google:', data.user?.email)
       onSuccess?.()
-    } catch (error: any) {
-      console.error('Google sign in error:', error)
-      onError?.(error.message || 'Failed to sign in with Google')
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to sign in with Google'
+      // eslint-disable-next-line no-console
+      console.error('Google sign in error:', err)
+      onError?.(message)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const initializeGoogleSignIn = () => {
-    if (!window.google || !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+  const initializeGoogleSignIn = (): void => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+    if (!window.google || !clientId) {
+      // eslint-disable-next-line no-console
       console.error('Google client not loaded or Client ID not configured')
       return
     }
 
-    // Make the callback function globally available
+    // Expose the callback (Google script calls it)
     window.handleSignInWithGoogle = handleSignInWithGoogle
 
-    // Initialize Google Identity Services
     window.google.accounts.id.initialize({
-      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      client_id: clientId,
       callback: window.handleSignInWithGoogle,
-      hosted_domain: ALLOWED_DOMAIN,
+      hosted_domain: ALLOWED_DOMAIN
     })
 
-    // Render the sign-in button with custom styling to match shadcn
     window.google.accounts.id.renderButton(
       document.getElementById('google-signin-button'),
       {
@@ -85,11 +114,9 @@ export default function GoogleSignInButton({
         size: 'large',
         text: 'continue_with',
         shape: 'rectangular',
-        logo_alignment: 'left',
+        logo_alignment: 'left'
       }
     )
-
-    // Initialization complete
   }
 
   return (
@@ -99,32 +126,17 @@ export default function GoogleSignInButton({
         strategy="afterInteractive"
         onLoad={initializeGoogleSignIn}
       />
-
       <div className="w-full">
-        {/* shadcn-styled wrapper around Google's button */}
         <div
           id="google-signin-button"
-          className={`
-            w-full
-            [&>div]:w-full
-            [&>div]:!flex
-            [&>div]:!justify-center
-            [&>div>div]:!w-full
-            ${isLoading ? 'opacity-50 pointer-events-none' : ''}
-          `}
-          style={{
-            // Override Google's default styles to match shadcn
-            display: 'flex',
-            justifyContent: 'center',
-          }}
+          className={`w-full [&>div]:w-full [&>div]:!flex [&>div]:!justify-center [&>div>div]:!w-full ${
+            isLoading ? 'opacity-50 pointer-events-none' : ''
+          }`}
+          style={{ display: 'flex', justifyContent: 'center' }}
         />
-
-        {/* Loading overlay */}
         {isLoading && (
           <div className="flex items-center justify-center mt-2">
-            <span className="text-sm text-muted-foreground">
-              Signing in...
-            </span>
+            <span className="text-sm text-muted-foreground">Signing in...</span>
           </div>
         )}
       </div>
