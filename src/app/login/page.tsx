@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { YMLoginForm } from '@/components/auth/YMLoginForm'
+import { Button } from '@/components/ui/button'
 
 export default function LoginPage() {
   const { user, loading } = useAuth()
@@ -13,12 +14,12 @@ export default function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
-      router.push('/home')
+      router.push('/onboarding?step=1')
     }
   }, [user, loading, router])
 
   const handleGoogleSuccess = () => {
-    router.push('/home')
+    router.push('/onboarding?step=1')
   }
 
   const handleGoogleError = (errorMessage: string) => {
@@ -35,11 +36,22 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="flex flex-col gap-4 w-full max-w-sm">
       <YMLoginForm
         onSuccess={handleGoogleSuccess}
         onError={handleGoogleError}
         error={error}
       />
+        
+        {/* Test bypass button */}
+        <Button
+          variant="outline"
+          onClick={() => router.push('/onboarding?step=1')}
+          className="w-full"
+        >
+          Next (Skip Authentication)
+        </Button>
+      </div>
     </div>
   )
 }
