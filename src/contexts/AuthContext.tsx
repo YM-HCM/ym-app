@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
+import { signOut as serverSignOut } from '@/app/auth/actions'
+
 interface AuthContextType {
   user: User | null
   loading: boolean
@@ -19,8 +21,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const ALLOWED_DOMAIN = 'youngmuslims.com'
 
-    // TODO: Add server-side domain validation via Supabase Auth Hook or RLS policy
-    // Client-side validation can be bypassed - this is only for UX feedback
+    // Domain validation is now handled server-side by middleware
+    // We keep this client-side check for immediate UI feedback
 
     // Check active sessions and validate domain
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -56,8 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    await serverSignOut()
   }
 
   return (
