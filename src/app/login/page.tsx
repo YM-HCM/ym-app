@@ -11,14 +11,18 @@ export default function LoginPage() {
   const router = useRouter()
 
   // Redirect if already logged in
+  // TODO: Make this dynamic - check if user has completed onboarding
+  // If onboarding_completed: redirect to /home
+  // If not completed: redirect to /onboarding?step=1
   useEffect(() => {
     if (user && !loading) {
-      router.push('/home')
+      router.push('/onboarding?step=1')
     }
   }, [user, loading, router])
 
   const handleGoogleSuccess = () => {
-    router.push('/home')
+    // TODO: Make this dynamic based on onboarding completion status
+    router.push('/onboarding?step=1')
   }
 
   const handleGoogleError = (errorMessage: string) => {
@@ -35,11 +39,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <YMLoginForm
-        onSuccess={handleGoogleSuccess}
-        onError={handleGoogleError}
-        error={error}
-      />
+      <div className="flex flex-col gap-4 w-full max-w-sm">
+        <YMLoginForm
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+          error={error}
+        />
+
+
+      </div>
     </div>
   )
 }

@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
+import { signOut as serverSignOut } from '@/app/auth/actions'
+
 interface AuthContextType {
   user: User | null
   loading: boolean
@@ -19,8 +21,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const ALLOWED_DOMAIN = 'youngmuslims.com'
 
-    // TODO: Add server-side domain validation via Supabase Auth Hook or RLS policy
-    // Client-side validation can be bypassed - this is only for UX feedback
+    // Domain validation is now handled server-side by middleware
+    // We keep this client-side check for immediate UI feedback
 
     // Check active sessions and validate domain
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -28,7 +30,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Validate domain for existing sessions
       if (user && !user.email?.endsWith(`@${ALLOWED_DOMAIN}`)) {
-        console.warn('User with invalid domain detected, signing out')
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('User with invalid domain detected, signing out')
+        }
         supabase.auth.signOut()
         setUser(null)
       } else {
@@ -43,7 +47,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Validate domain for new sessions
       if (user && !user.email?.endsWith(`@${ALLOWED_DOMAIN}`)) {
-        console.warn('User with invalid domain attempted login, signing out')
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('User with invalid domain attempted login, signing out')
+        }
         supabase.auth.signOut()
         setUser(null)
       } else {
@@ -56,8 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    await serverSignOut()
   }
 
   return (
@@ -67,7 +72,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-// TODO: Add error boundary to catch useAuth errors and prevent full app crashes
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {

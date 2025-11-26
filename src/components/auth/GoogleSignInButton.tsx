@@ -61,8 +61,8 @@ export default function GoogleSignInButton({
       // Decode the JWT to check the email domain before sending to Supabase
       const payload = JSON.parse(atob(response.credential.split('.')[1]))
 
-      // TODO: Move domain validation to server-side (API route or Supabase Auth Hook)
-      // Client-side validation can be bypassed - this is only for UX
+      // Domain validation is enforced by middleware
+      // This client-side check provides immediate feedback
       // Verify email domain
       if (!payload.email?.endsWith(`@${ALLOWED_DOMAIN}`)) {
         const errorMsg = `Access restricted to @${ALLOWED_DOMAIN} accounts only`
@@ -79,10 +79,14 @@ export default function GoogleSignInButton({
 
       if (error) throw error
 
-      console.log('Successfully logged in with Google:', data.user?.email)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Successfully logged in with Google:', data.user?.email)
+      }
       onSuccess?.()
     } catch (error: unknown) {
-      console.error('Google sign in error:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Google sign in error:', error)
+      }
       const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google'
       onError?.(errorMessage)
     } finally {

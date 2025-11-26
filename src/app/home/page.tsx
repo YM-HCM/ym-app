@@ -1,38 +1,15 @@
-'use client'
-
-import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { SignOutButton } from './SignOutButton'
 
-export default function HomePage() {
-  const { user, signOut, loading } = useAuth()
-  const router = useRouter()
+export default async function HomePage() {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
 
   // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login')
-    }
-  }, [user, loading, router])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <span className="text-muted-foreground">Loading...</span>
-      </div>
-    )
-  }
-
-  // Protected content - only shown to authenticated users
-  if (!user) {
-    // Show loading while redirect happens
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <span className="text-muted-foreground">Redirecting...</span>
-      </div>
-    )
+  if (error || !user) {
+    redirect('/login')
   }
 
   return (
@@ -54,13 +31,7 @@ export default function HomePage() {
               {new Date(user.created_at).toLocaleDateString()}
             </p>
           </div>
-          <Button
-            onClick={() => signOut()}
-            variant="destructive"
-            className="w-full"
-          >
-            Sign Out
-          </Button>
+          <SignOutButton />
         </CardContent>
       </Card>
     </div>
