@@ -30,7 +30,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Validate domain for existing sessions
       if (user && !user.email?.endsWith(`@${ALLOWED_DOMAIN}`)) {
-        console.warn('User with invalid domain detected, signing out')
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('User with invalid domain detected, signing out')
+        }
         supabase.auth.signOut()
         setUser(null)
       } else {
@@ -45,7 +47,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Validate domain for new sessions
       if (user && !user.email?.endsWith(`@${ALLOWED_DOMAIN}`)) {
-        console.warn('User with invalid domain attempted login, signing out')
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('User with invalid domain attempted login, signing out')
+        }
         supabase.auth.signOut()
         setUser(null)
       } else {
@@ -68,7 +72,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-// TODO: Add error boundary to catch useAuth errors and prevent full app crashes
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {

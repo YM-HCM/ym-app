@@ -39,8 +39,7 @@ export default function PersonalInfo() {
   const handleNext = () => {
     // TODO: Add validation
     // TODO: Save data to state management or backend
-    console.log({ phoneNumber, email, birthdate, ethnicity })
-    
+
     // Continue to step 3
     router.push("/onboarding?step=3")
   }

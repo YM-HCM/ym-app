@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { YMLoginForm } from '@/components/auth/YMLoginForm'
-import { Button } from '@/components/ui/button'
 
 export default function LoginPage() {
   const { user, loading } = useAuth()
