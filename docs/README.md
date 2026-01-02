@@ -27,7 +27,25 @@ Young Muslim's proprietary application that serves to create a database of organ
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install Dependencies
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+### 2. Set Up Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+
+```bash
+cp .env.example .env.local
+```
+
+### 3. Run the Development Server
 
 ```bash
 npm run dev
@@ -42,6 +60,28 @@ bun dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+<br>
+
+## Claude Code Setup (for contributors using Claude Code)
+
+If you're using [Claude Code](https://docs.anthropic.com/en/docs/claude-code) for development, install the following MCP servers and plugins.
+
+> **MCP vs Plugins:** MCP servers connect Claude to external services (like your database). Plugins add skills and tools (like documentation lookup). Some plugins include MCP servers.
+
+| Name | Type | What it does | Install command |
+|------|------|--------------|-----------------|
+| **Supabase MCP** | MCP Server | Query our database tables, run SQL | `claude mcp add --scope project --transport http supabase "https://mcp.supabase.com/mcp?project_ref=todqvyzdvpnwuuonxwch&read_only=true&features=storage%2Cbranching%2Cfunctions%2Cdevelopment%2Cdebugging%2Cdocs%2Caccount%2Cdatabase"` |
+| **context7** | Plugin | Look up docs for Next.js, React, Tailwind, etc. | `claude plugin install context7@claude-plugins-official` |
+| **supabase** | Plugin | Search Supabase documentation | `claude plugin install supabase@claude-plugins-official` |
+| **playwright** | Plugin + MCP | Browser automation for UI testing | `claude plugin install playwright@claude-plugins-official` |
+| **frontend-design** | Plugin | UI/UX design assistance | `claude plugin install frontend-design@claude-plugins-official` |
+
+After installing Supabase MCP, authenticate (run in a regular terminal, not IDE):
+```bash
+claude /mcp
+# Select "supabase" → "Authenticate"
+```
 
 
 
