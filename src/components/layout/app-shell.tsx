@@ -13,7 +13,7 @@ interface AppShellProps {
  * Features:
  * - Collapsible sidebar on desktop (icon mode)
  * - Sheet-based overlay on mobile
- * - Hamburger trigger in mobile header
+ * - ChatGPT-style toggle (button in sidebar header, not content)
  * - State persisted via cookie
  */
 export function AppShell({ children }: AppShellProps) {

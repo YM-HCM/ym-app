@@ -1,7 +1,16 @@
 'use client'
 
+// TODO: Fix sidebar icon alignment bug - when collapsed, the YM logo and profile avatar
+// (which use size="lg") shift position compared to nav icons (which use default size).
+// The issue is that the lg variant has `group-data-[collapsible=icon]:!p-0` which removes
+// padding, while default size has `!p-2`. Need to either:
+// 1. Make all buttons use consistent sizing, or
+// 2. Override the lg variant's collapsed padding to match nav icons
+
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import {
   Home,
   Users,
@@ -11,6 +20,9 @@ import {
   User,
   LogOut,
   ChevronUp,
+  PanelLeftClose,
+  PanelLeft,
+  X,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -30,6 +42,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
 
 const NAV_ITEMS = [
@@ -43,7 +56,13 @@ export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, signOut } = useAuth()
-  const { isMobile, setOpenMobile } = useSidebar()
+  // Using shadcn's useSidebar hook for state and toggle
+  const { isMobile, setOpenMobile, state, toggleSidebar } = useSidebar()
+
+  // Custom state for hover effect on entire collapsed sidebar
+  const [isHoveringCollapsed, setIsHoveringCollapsed] = useState(false)
+
+  const isCollapsed = state === 'collapsed'
 
   // Extract display name from email (e.g., "omar.khan@..." -> "Omar")
   const displayName = user?.email?.split('@')[0]?.split('.')[0] ?? 'User'
@@ -72,50 +91,97 @@ export function AppSidebar() {
     console.log('Share feedback clicked')
   }
 
+  // Handle click on collapsed sidebar to expand
+  const handleSidebarClick = (e: React.MouseEvent) => {
+    // Only expand if collapsed and on desktop
+    if (isCollapsed && !isMobile) {
+      // Don't expand if clicking on a button or link (let those handle their own actions)
+      const target = e.target as HTMLElement
+      const isInteractiveElement = target.closest(
+        'button, a, [role="menuitem"], [role="button"], input, select, textarea'
+      )
+      if (!isInteractiveElement) {
+        setIsHoveringCollapsed(false) // Reset hover state when expanding
+        toggleSidebar()
+      }
+    }
+  }
+
   return (
-    <Sidebar collapsible="icon">
-      {/* Profile Header */}
-      <SidebarHeader>
+    <Sidebar
+      collapsible="icon"
+      onMouseEnter={() => isCollapsed && !isMobile && setIsHoveringCollapsed(true)}
+      onMouseLeave={() => setIsHoveringCollapsed(false)}
+      onClick={handleSidebarClick}
+      className={isCollapsed && !isMobile ? 'cursor-pointer' : ''}
+    >
+      {/* Header - YM Logo */}
+      <SidebarHeader className="relative">
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  {/* Avatar */}
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                    {initials}
-                  </div>
-                  {/* Name */}
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{capitalizedName}</span>
-                  </div>
-                  <ChevronUp className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side={isMobile ? 'bottom' : 'right'}
-                align="end"
-                sideOffset={4}
+            {/* When collapsed on desktop: logo swaps to expand icon on sidebar hover */}
+            {isCollapsed && !isMobile ? (
+              <SidebarMenuButton
+                size="lg"
+                onClick={toggleSidebar}
+                tooltip="Open sidebar"
               >
-                <DropdownMenuItem onClick={handleViewProfile}>
-                  <User className="mr-2 h-4 w-4" />
-                  View Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                {isHoveringCollapsed ? (
+                  <PanelLeft className="!size-5" />
+                ) : (
+                  <Image
+                    src="/favicon.ico"
+                    alt="Young Muslims"
+                    width={20}
+                    height={20}
+                    className="rounded shrink-0"
+                  />
+                )}
+              </SidebarMenuButton>
+            ) : (
+              /* When expanded: show logo with app name */
+              <SidebarMenuButton size="lg" className="cursor-default hover:bg-transparent">
+                <Image
+                  src="/favicon.ico"
+                  alt="Young Muslims"
+                  width={20}
+                  height={20}
+                  className="rounded shrink-0"
+                />
+                <span className="truncate font-semibold">Young Muslims</span>
+              </SidebarMenuButton>
+            )}
           </SidebarMenuItem>
         </SidebarMenu>
+
+        {/* Close/Collapse button - vertically centered with logo */}
+        {/* Mobile: X to close sheet overlay */}
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setOpenMobile(false)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 text-sidebar-foreground/70 hover:text-sidebar-foreground"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close sidebar</span>
+          </Button>
+        )}
+        {/* Desktop: PanelLeftClose to collapse (only when expanded) */}
+        {!isCollapsed && !isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 text-sidebar-foreground/70 hover:text-sidebar-foreground"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+            <span className="sr-only">Collapse sidebar</span>
+          </Button>
+        )}
       </SidebarHeader>
 
-      {/* Navigation */}
+      {/* Navigation - using shadcn's built-in tooltip support */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -140,9 +206,46 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer with Feedback */}
+      {/* Footer - User Profile + Feedback */}
       <SidebarFooter>
         <SidebarMenu>
+          {/* User Profile - dropdown opens upward */}
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  tooltip={capitalizedName}
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  {/* Avatar */}
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                    {initials}
+                  </div>
+                  {/* Name with inline chevron */}
+                  <span className="truncate font-semibold max-w-[100px]">{capitalizedName}</span>
+                  <ChevronUp className="ml-auto h-4 w-4 shrink-0" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-48 rounded-lg"
+                side="top"
+                align="start"
+                sideOffset={4}
+              >
+                <DropdownMenuItem onClick={handleViewProfile}>
+                  <User className="mr-2 h-4 w-4" />
+                  View Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+
+          {/* Share Feedback */}
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="Share Feedback" onClick={handleFeedback}>
               <MessageSquare />
