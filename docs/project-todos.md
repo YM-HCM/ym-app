@@ -6,7 +6,6 @@
 - [ ] Review data model with Nooh
 - [ ] Get alumni database from Umar Khattak
 - [ ] Clarify which NN database is current (Version A vs B)
-- [ ] Clarify what data to collect during onboarding
 
 ---
 
@@ -89,3 +88,52 @@
 - [ ] Error handling
 - [ ] Loading states
 - [ ] Mobile responsiveness
+
+---
+
+## Onboarding UX Enhancement
+
+> **How to implement:** Use the `frontend-design` skill when ready to build these.
+> Run: `use the frontend design skill to implement the onboarding motion/transitions`
+> The skill will guide you through creating distinctive, production-grade UI with motion.
+
+### Priority 1: Page Transitions (Foundation)
+- [ ] Install framer-motion: `npm install framer-motion`
+- [ ] Create `OnboardingTransition` wrapper component
+- [ ] Wrap each step's content with animated enter/exit
+- [ ] Direction-aware: forward slides left, back slides right
+- [ ] Smooth fade + translate (opacity 0→1, x: ±20px → 0)
+
+### Priority 2: Step 7 Celebration (Memorable Ending)
+- [ ] Install confetti library: `npm install canvas-confetti`
+- [ ] Animated SVG checkmark that draws itself on mount
+- [ ] Confetti burst triggered on page load
+- [ ] Personalized message using user's name from context
+- [ ] Staggered text reveal for heading and subtext
+
+### Priority 3: Step Indicator (Visual Progress)
+- [ ] Replace thin `<Progress>` bar with segmented step indicator
+- [ ] Show step numbers (1-7) connected by lines
+- [ ] Completed steps show checkmarks
+- [ ] Current step highlighted with animation
+- [ ] Optional: show step labels on hover/focus
+
+### Priority 4: Step 1 Welcome (First Impression)
+- [ ] Staggered reveal: heading → subtext → form fields (with delays)
+- [ ] Subtle background gradient or decorative element
+- [ ] Consider warm color accent for welcoming feel
+
+### Priority 5: Micro-interactions (Polish)
+- [ ] Step 6 skill badges: bouncy scale animation on selection
+- [ ] Steps 3-5: new cards animate in when added (slide + fade)
+- [ ] Button hover states: subtle lift/shadow effect
+- [ ] Input focus: glowing border animation
+
+### Design Notes
+- **Current issue:** Every step looks identical (monotonous layout)
+- **Color:** Currently pure grayscale—consider adding one accent color
+- **Typography:** Using default font-sans—consider a display font for headings
+- **Aesthetic direction options:**
+  - Warm & Welcoming: earthy tones, soft gradients
+  - Modern & Confident: deep navy + gold, geometric patterns
+  - Fresh & Energetic: vibrant teal/emerald, playful illustrations
