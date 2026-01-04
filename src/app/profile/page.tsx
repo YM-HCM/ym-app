@@ -252,7 +252,6 @@ export default function ProfilePage() {
       {/* Unsaved Changes Modal */}
       <UnsavedChangesModal
         isOpen={showUnsavedModal}
-        onClose={handleStay}
         onSaveAndLeave={handleSaveAndLeave}
         onDiscardAndLeave={handleDiscardAndLeave}
         onStay={handleStay}

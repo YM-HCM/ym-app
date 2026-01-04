@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button'
 
 interface UnsavedChangesModalProps {
   isOpen: boolean
-  onClose: () => void
   onSaveAndLeave: () => void
   onDiscardAndLeave: () => void
   onStay: () => void
@@ -21,13 +20,12 @@ interface UnsavedChangesModalProps {
 
 export function UnsavedChangesModal({
   isOpen,
-  onClose,
   onSaveAndLeave,
   onDiscardAndLeave,
   onStay,
   changeCount,
 }: UnsavedChangesModalProps) {
-  // Clicking outside or pressing Escape = stay on page (handled by onClose -> onStay)
+  // Clicking outside or pressing Escape = stay on page
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onStay()
@@ -50,7 +48,7 @@ export function UnsavedChangesModal({
             onClick={onDiscardAndLeave}
             className="flex-1"
           >
-            Don't save
+            Don&apos;t save
           </Button>
           <Button
             onClick={onSaveAndLeave}
