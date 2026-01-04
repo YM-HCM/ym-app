@@ -5,6 +5,7 @@
 - TypeScript 5.x (strict mode)
 - Tailwind CSS 3.4.17 + shadcn/ui
 - Supabase (Auth + Database)
+- **Bun** for package management (`bun install`, `bun run dev`, `bun run build`)
 
 ## Code Style & Conventions
 
@@ -21,17 +22,14 @@
 - Props interface above component, use destructuring
 
 ### UI Components (shadcn/ui)
-- **CHECK SHADCN FIRST**: https://ui.shadcn.com/docs/components
-- Install: `npx shadcn@latest add [component]`
-- Components go in `src/components/ui/`
-- Use `cn()` from `@/lib/utils` for className merging
-- Only create custom components if shadcn doesn't have it
-- Follow shadcn patterns: variants with `class-variance-authority`, extend HTML element props
+1. **Check shadcn first**: https://ui.shadcn.com/docs/components
+2. Install: `npx shadcn@latest add [component]`
+3. Import: `import { Button } from "@/components/ui/button"`
+4. Components go in `src/components/ui/`
+5. Use `cn()` from `@/lib/utils` for className merging
+6. Only create custom components if shadcn doesn't have it
 
 ### Styling & Design System
-- **Tailwind utility classes** (prefer over custom CSS)
-- **Design tokens** defined in `tailwind.config.js` and `globals.css`
-- Use `cn()` from `@/lib/utils` for conditional/merged classes
 
 #### Color Palette (STRICTLY USE THESE)
 Only use the design system colors - NEVER introduce custom colors:
@@ -46,10 +44,7 @@ Only use the design system colors - NEVER introduce custom colors:
 - `ring-ring` - focus rings
 
 #### Typography
-- **Font**: Geist Sans (loaded in `layout.tsx` via `next/font/google`)
-  - CSS variable: `--font-geist-sans`
-  - Tailwind class: `font-sans` (configured in `tailwind.config.js`)
-- **Monospace**: Geist Mono for code (`font-mono` / `--font-geist-mono`)
+- **Font**: Geist Sans (`font-sans`), Geist Mono for code (`font-mono`)
 - Use Tailwind's type scale: `text-sm`, `text-base`, `text-lg`, `text-xl`, etc.
 - Font weights: `font-normal`, `font-medium`, `font-semibold`, `font-bold`
 - Letter spacing: `tracking-tight` for headings
@@ -60,9 +55,18 @@ Only use the design system colors - NEVER introduce custom colors:
 - Standard padding: `p-6` for page containers
 - Consistent gaps: `gap-2` (tight), `gap-4` (normal), `gap-6` (spacious)
 
-#### Border Radius
-- Use design tokens: `rounded-sm`, `rounded-md`, `rounded-lg` (from `--radius`)
-- Icons/avatars: `rounded-2xl` or `rounded-full`
+#### Form Sections
+- Section headings: `text-xl font-semibold tracking-tight text-foreground`
+- Form field layout: `flex flex-col gap-1.5` with shadcn `Label`
+- Section spacing: `space-y-5`
+- Use shadcn `Badge` for counters/indicators
+
+#### Responsive Testing
+Test at these breakpoints:
+- **Small iOS**: 375px (iPhone SE / Mini)
+- **Standard iOS**: 393px (iPhone 16)
+- **Large iOS**: 430px (iPhone 16 Pro Max)
+- **Desktop**: 1280px+
 
 #### Animations (keep subtle)
 - Transitions: `transition-all duration-300` or `duration-500`
@@ -70,12 +74,17 @@ Only use the design system colors - NEVER introduce custom colors:
 - Entry animations: opacity + translate with staggered delays
 
 #### ❌ DO NOT
-- Use arbitrary colors (e.g., `bg-amber-500`, `text-orange-600`, `from-rose-50`)
+- Use arbitrary colors (e.g., `bg-amber-500`, `text-orange-600`)
 - Add gradient backgrounds unless part of design system
-- Override Button styles with custom gradient classes
 - Use colors not in the design system palette
 - Add decorative patterns or textures
 - Import external fonts beyond Geist
+
+### State Management
+- **React Context** - Multi-page state that persists across routes (e.g., OnboardingContext)
+- **Custom Hooks** - Single-page form state that resets on unmount (e.g., useProfileForm)
+- Server Components + prop drilling for simple state
+- Server Actions for mutations
 
 ### Authentication & Supabase
 - Supabase client: `@/lib/supabase`
@@ -95,11 +104,6 @@ src/
 ├── lib/             # Utility functions and configurations
 └── middleware.ts    # Next.js middleware
 ```
-
-### State Management
-- React Context for global state (e.g., AuthContext)
-- Server Components + prop drilling for simple state
-- Server Actions for mutations
 
 ### Error Handling
 - try-catch for async operations
@@ -123,7 +127,7 @@ src/
 - PR flow: feature → dev → main
 
 ### Commit Messages
-- Brief, single-line descriptions (see git history for style reference)
+- Brief, single-line descriptions
 - Use conventional commits when appropriate: `feat:`, `fix:`, `docs:`, etc.
 - **NEVER include Claude as co-author or add AI-generated footers**
 
@@ -131,24 +135,6 @@ src/
 - `feature/descriptive-name` - new features
 - `fix/bug-description` - bug fixes
 - `hotfix/urgent-fix` - production hotfixes
-
-## Common Workflows
-
-### Adding UI Components
-1. **Check shadcn first**: https://ui.shadcn.com/docs/components
-2. Install: `npx shadcn@latest add [component]`
-3. Import: `import { Button } from "@/components/ui/button"`
-4. Only create custom if shadcn doesn't have it
-
-### Creating Pages
-1. Add `page.tsx` in `src/app/[route]/`
-2. Use Server Component by default
-3. Add metadata: `export const metadata`
-
-### Authentication
-- Check auth state via AuthContext
-- Middleware handles redirects
-- Use Supabase session for protected routes
 
 ## Best Practices
 - **Performance**: Optimize images, minimize client JS

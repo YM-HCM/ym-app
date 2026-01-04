@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, type ReactNode } from 'react'
-import { Pencil, Check, X } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -35,6 +35,7 @@ interface TextFieldProps extends BaseProps {
   placeholder?: string
   formatter?: (value: string) => string
   validator?: (value: string) => boolean
+  errorMessage?: string
 }
 
 interface SelectFieldProps extends BaseProps {
@@ -60,8 +61,12 @@ export function InlineEditField(props: InlineEditFieldProps) {
   const [tempValue, setTempValue] = useState<string | Date | undefined>(
     props.type === 'date' ? props.value : props.value
   )
+  const [hasError, setHasError] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  // Ref to track latest tempValue for click-outside handler (avoids stale closure)
+  const tempValueRef = useRef(tempValue)
+  tempValueRef.current = tempValue
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -77,8 +82,49 @@ export function InlineEditField(props: InlineEditFieldProps) {
     setTempValue(propsType === 'date' ? propsValue : propsValue)
   }, [propsValue, propsType])
 
+  // Handle click outside to confirm/blur
+  useEffect(() => {
+    if (!isEditing) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        // Use ref to get latest tempValue (avoids stale closure)
+        const currentValue = tempValueRef.current
+        if (props.type === 'text' || props.type === 'email' || props.type === 'tel') {
+          if (props.validator && currentValue && !props.validator(currentValue as string)) {
+            setHasError(true)
+            return
+          }
+          setHasError(false)
+          props.onChange(currentValue as string)
+        } else if (props.type === 'select') {
+          props.onChange(currentValue as string)
+        } else if (props.type === 'date') {
+          props.onChange(currentValue as Date | undefined)
+        }
+        setIsEditing(false)
+      }
+    }
+
+    // Delay adding listener to avoid immediate trigger
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside)
+    }, 0)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isEditing, props])
+
   const handleConfirm = () => {
     if (props.type === 'text' || props.type === 'email' || props.type === 'tel') {
+      // Run validation if provided
+      if (props.validator && tempValue && !props.validator(tempValue as string)) {
+        setHasError(true)
+        return // Don't save invalid value, keep editing
+      }
+      setHasError(false)
       props.onChange(tempValue as string)
     } else if (props.type === 'select') {
       props.onChange(tempValue as string)
@@ -90,6 +136,7 @@ export function InlineEditField(props: InlineEditFieldProps) {
 
   const handleCancel = () => {
     setTempValue(props.type === 'date' ? props.value : props.value)
+    setHasError(false)
     setIsEditing(false)
   }
 
@@ -150,80 +197,56 @@ export function InlineEditField(props: InlineEditFieldProps) {
           <Pencil className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
         </button>
       ) : (
-        <div className="flex items-center gap-2">
+        <div className="space-y-1">
           {props.type === 'text' || props.type === 'email' || props.type === 'tel' ? (
-            <>
-              <div className="relative flex-1">
-                {icon && (
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    {icon}
-                  </span>
-                )}
-                <Input
-                  ref={inputRef}
-                  type={props.type}
-                  value={tempValue as string}
-                  onChange={(e) => {
-                    const val = props.formatter ? props.formatter(e.target.value) : e.target.value
-                    setTempValue(val)
-                  }}
-                  onKeyDown={handleKeyDown}
-                  placeholder={props.placeholder}
-                  className={cn(icon && 'pl-10')}
-                />
-              </div>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={handleConfirm}
-                className="h-9 w-9 text-green-600 hover:text-green-700 hover:bg-green-50"
-              >
-                <Check className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={handleCancel}
-                className="h-9 w-9 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </>
-          ) : props.type === 'select' ? (
-            <>
-              <Select
+            <div className="relative">
+              {icon && (
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  {icon}
+                </span>
+              )}
+              <Input
+                ref={inputRef}
+                type={props.type}
                 value={tempValue as string}
-                onValueChange={(val) => {
+                onChange={(e) => {
+                  const val = props.formatter ? props.formatter(e.target.value) : e.target.value
                   setTempValue(val)
-                  props.onChange(val)
-                  setIsEditing(false)
+                  setHasError(false) // Clear error on change
                 }}
-              >
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder={props.placeholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  {props.options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={handleCancel}
-                className="h-9 w-9 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </>
+                onKeyDown={handleKeyDown}
+                placeholder={props.placeholder}
+                className={cn(icon && 'pl-10', hasError && 'border-destructive focus-visible:ring-destructive')}
+              />
+            </div>
+          ) : props.type === 'select' ? (
+            <Select
+              value={tempValue as string}
+              onValueChange={(val) => {
+                setTempValue(val)
+                props.onChange(val)
+                setIsEditing(false)
+              }}
+              open
+              onOpenChange={(open) => {
+                if (!open) {
+                  setIsEditing(false)
+                }
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={props.placeholder} />
+              </SelectTrigger>
+              <SelectContent>
+                {props.options.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           ) : props.type === 'date' ? (
-            <Popover open onOpenChange={(open) => !open && handleCancel()}>
+            <Popover open onOpenChange={(open) => !open && setIsEditing(false)}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -249,6 +272,9 @@ export function InlineEditField(props: InlineEditFieldProps) {
               </PopoverContent>
             </Popover>
           ) : null}
+          {hasError && (props.type === 'text' || props.type === 'email' || props.type === 'tel') && props.errorMessage && (
+            <p className="text-sm text-destructive">{props.errorMessage}</p>
+          )}
         </div>
       )}
     </div>

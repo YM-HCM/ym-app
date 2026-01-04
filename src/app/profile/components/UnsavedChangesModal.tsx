@@ -1,12 +1,10 @@
 'use client'
 
 import { useEffect, useCallback } from 'react'
-import { AlertTriangle } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -29,45 +27,38 @@ export function UnsavedChangesModal({
   onStay,
   changeCount,
 }: UnsavedChangesModalProps) {
+  // Clicking outside or pressing Escape = stay on page (handled by onClose -> onStay)
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onStay()
+    }
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
-            </div>
-            <div>
-              <DialogTitle>Unsaved changes</DialogTitle>
-              <DialogDescription className="mt-1">
-                You have {changeCount} unsaved {changeCount === 1 ? 'change' : 'changes'} that will be lost.
-              </DialogDescription>
-            </div>
-          </div>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="w-[calc(100%-2rem)] max-w-sm rounded-lg">
+        <DialogHeader className="text-center">
+          <DialogTitle>Save changes?</DialogTitle>
+          <DialogDescription>
+            You have {changeCount} unsaved {changeCount === 1 ? 'change' : 'changes'}.
+          </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className="mt-4 flex-col gap-2 sm:flex-row">
+        <div className="flex gap-3 mt-2">
           <Button
             variant="outline"
             onClick={onDiscardAndLeave}
-            className="w-full sm:w-auto text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+            className="flex-1"
           >
-            Discard changes
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onStay}
-            className="w-full sm:w-auto"
-          >
-            Stay on page
+            Don't save
           </Button>
           <Button
             onClick={onSaveAndLeave}
-            className="w-full sm:w-auto"
+            className="flex-1"
           >
-            Save & leave
+            Save
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

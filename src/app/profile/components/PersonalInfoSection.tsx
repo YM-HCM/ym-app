@@ -23,6 +23,18 @@ function formatPhoneNumber(value: string): string {
   return `(${limited.slice(0, 3)}) ${limited.slice(3, 6)}-${limited.slice(6)}`
 }
 
+// Check if phone has 10 digits
+function isValidPhone(phone: string): boolean {
+  const digits = phone.replace(/\D/g, '')
+  return digits.length === 10
+}
+
+// Basic email validation: has @ and domain with TLD
+function isValidEmail(email: string): boolean {
+  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return pattern.test(email)
+}
+
 interface PersonalInfoSectionProps {
   phoneNumber?: string
   personalEmail?: string
@@ -64,6 +76,8 @@ export function PersonalInfoSection({
           icon={<Phone className="h-4 w-4" />}
           placeholder="(555) 123-4567"
           formatter={formatPhoneNumber}
+          validator={isValidPhone}
+          errorMessage="Please enter a valid 10-digit phone number"
         />
 
         <InlineEditField
@@ -73,6 +87,8 @@ export function PersonalInfoSection({
           onChange={onPersonalEmailChange}
           icon={<Mail className="h-4 w-4" />}
           placeholder="you@example.com"
+          validator={isValidEmail}
+          errorMessage="Please enter a valid email address"
         />
 
         {googleEmail && (

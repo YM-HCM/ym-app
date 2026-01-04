@@ -80,9 +80,6 @@ export function FloatingSaveBar({
       ? `${changeCount} unsaved ${changeCount === 1 ? 'change' : 'changes'}`
       : 'Unsaved changes'
 
-  // Shorter text for mobile
-  const shortChangeText =
-    changeCount !== undefined ? `${changeCount} unsaved` : 'Unsaved'
 
   return (
     <div
@@ -94,14 +91,14 @@ export function FloatingSaveBar({
         className
       )}
     >
-      <div className="flex items-center gap-2 sm:gap-3 bg-background/95 backdrop-blur-sm border shadow-lg rounded-full pl-3 sm:pl-4 pr-2 py-2">
+      {/* TODO: Add smooth crossfade transition between states while keeping pill size stable */}
+      <div className="flex items-center gap-2 sm:gap-3 bg-background/95 backdrop-blur-sm border shadow-lg rounded-full px-3 sm:px-4 py-2">
         {showSuccess ? (
           <>
             <Check className="h-4 w-4 text-green-600 shrink-0" />
             <span className="text-sm font-medium text-green-600 whitespace-nowrap">
               {successMessage}
             </span>
-            <div className="w-10" /> {/* Spacer for visual balance */}
           </>
         ) : showError ? (
           <>
@@ -121,11 +118,7 @@ export function FloatingSaveBar({
           </>
         ) : (
           <>
-            {/* Show shorter text on mobile, full text on larger screens */}
-            <span className="text-sm text-muted-foreground whitespace-nowrap sm:hidden">
-              {shortChangeText}
-            </span>
-            <span className="text-sm text-muted-foreground whitespace-nowrap hidden sm:inline">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
               {changeText}
             </span>
             <Button
