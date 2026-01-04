@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Calendar as CalendarIcon, Mail, Phone, User } from "lucide-react"
+import { Calendar as CalendarIcon, Globe, Mail, Phone } from "lucide-react"
 import { format } from "date-fns"
 
 import { Button } from "@/components/ui/button"
@@ -23,25 +23,56 @@ import {
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
+import { useOnboarding } from "@/contexts/OnboardingContext"
+import { calculateProgress } from "./constants"
+
+// Common ethnicities - can be expanded as needed
+const ETHNICITIES = [
+  "Afghan",
+  "Algerian",
+  "Bangladeshi",
+  "Egyptian",
+  "Emirati",
+  "Ethiopian",
+  "Indian",
+  "Indonesian",
+  "Iranian",
+  "Iraqi",
+  "Jordanian",
+  "Kuwaiti",
+  "Lebanese",
+  "Libyan",
+  "Malaysian",
+  "Moroccan",
+  "Nigerian",
+  "Pakistani",
+  "Palestinian",
+  "Saudi",
+  "Somali",
+  "Sudanese",
+  "Syrian",
+  "Tunisian",
+  "Turkish",
+  "Yemeni",
+  "Other",
+] as const
 
 export default function PersonalInfo() {
   const router = useRouter()
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [email, setEmail] = useState("")
-  const [birthdate, setBirthdate] = useState<Date>()
-  const [ethnicity, setEthnicity] = useState("")
+  const { data, updateData } = useOnboarding()
 
-  // Calculate progress: Step 2 of 15 = 13.3%
-  const currentStep = 2
-  const totalSteps = 15
-  const progressPercentage = (currentStep / totalSteps) * 100
+  // Initialize from context (supports back navigation)
+  const [phoneNumber, setPhoneNumber] = useState(data.phoneNumber ?? "")
+  const [personalEmail, setPersonalEmail] = useState(data.personalEmail ?? "")
+  const [ethnicity, setEthnicity] = useState(data.ethnicity ?? "")
+  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(data.dateOfBirth)
+
+  const progressPercentage = calculateProgress(1)
 
   const handleNext = () => {
-    // TODO: Add validation
-    // TODO: Save data to state management or backend
-
-    // Continue to step 3
-    router.push("/onboarding?step=3")
+    // Save to context before navigating
+    updateData({ phoneNumber, personalEmail, ethnicity, dateOfBirth })
+    router.push("/onboarding?step=2")
   }
 
   return (
@@ -52,23 +83,28 @@ export default function PersonalInfo() {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-20">
+      <div className="flex flex-1 flex-col items-center justify-center gap-12">
         {/* Heading */}
-        <h1 className="text-center text-5xl font-semibold tracking-tight">
-          Tell us a little more about yourself
-        </h1>
+        <div className="text-center">
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+            Welcome! Let&apos;s get started
+          </h1>
+          <p className="mt-3 text-muted-foreground">
+            First, tell us a bit about yourself
+          </p>
+        </div>
 
         {/* Form Fields */}
-        <div className="flex w-full max-w-md flex-col gap-6">
+        <div className="flex w-full max-w-md flex-col gap-5">
           {/* Phone Number */}
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="phone">Phone number</Label>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="phone">Phone Number</Label>
             <div className="relative">
-              <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="phone"
                 type="tel"
-                placeholder="Enter your phone number"
+                placeholder="(555) 123-4567"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 className="pl-10"
@@ -77,79 +113,77 @@ export default function PersonalInfo() {
           </div>
 
           {/* Personal Email */}
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="email">Personal email</Label>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="personalEmail">Personal Email</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                id="email"
+                id="personalEmail"
                 type="email"
-                placeholder="Enter your email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                value={personalEmail}
+                onChange={(e) => setPersonalEmail(e.target.value)}
                 className="pl-10"
               />
             </div>
           </div>
 
-          {/* Birthdate */}
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="birthdate">Birthdate</Label>
+          {/* Ethnicity */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="ethnicity">Ethnicity</Label>
+            <div className="relative">
+              <Globe className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Select value={ethnicity} onValueChange={setEthnicity}>
+                <SelectTrigger className="pl-10">
+                  <SelectValue placeholder="Select your ethnicity" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ETHNICITIES.map((eth) => (
+                    <SelectItem key={eth} value={eth.toLowerCase()}>
+                      {eth}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Date of Birth */}
+          <div className="flex flex-col gap-1.5">
+            <Label>Date of Birth</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !birthdate && "text-muted-foreground"
+                    !dateOfBirth && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-5 w-5" />
-                  {birthdate ? format(birthdate, "PPP") : "Select your birthdate"}
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateOfBirth ? format(dateOfBirth, "PPP") : "Select your date of birth"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={birthdate}
-                  onSelect={setBirthdate}
+                  selected={dateOfBirth}
+                  onSelect={setDateOfBirth}
                   initialFocus
                   captionLayout="dropdown"
-                  fromYear={1900}
-                  toYear={new Date().getFullYear()}
+                  fromYear={1940}
+                  toYear={new Date().getFullYear() - 10}
                 />
               </PopoverContent>
             </Popover>
           </div>
-
-          {/* Ethnicity */}
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="ethnicity">Ethnicity</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-              <Select value={ethnicity} onValueChange={setEthnicity}>
-                <SelectTrigger className="pl-10">
-                  <SelectValue placeholder="Select an ethnicity" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="asian">Asian</SelectItem>
-                  <SelectItem value="black">Black or African American</SelectItem>
-                  <SelectItem value="hispanic">Hispanic or Latino</SelectItem>
-                  <SelectItem value="native">Native American or Alaska Native</SelectItem>
-                  <SelectItem value="pacific">Native Hawaiian or Pacific Islander</SelectItem>
-                  <SelectItem value="white">White</SelectItem>
-                  <SelectItem value="two-or-more">Two or More Races</SelectItem>
-                  <SelectItem value="prefer-not">Prefer not to say</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Next Button */}
-      <div className="flex w-full items-center justify-center pb-4">
-        <Button onClick={handleNext} className="w-60">
+      {/* Navigation Buttons */}
+      <div className="flex w-full items-center justify-center gap-4 pb-4">
+        {/* No previous button for first step */}
+        <Button onClick={handleNext} className="w-40">
           Next
         </Button>
       </div>

@@ -3,12 +3,11 @@
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { calculateProgress } from "./constants"
 
 export default function Step4() {
   const router = useRouter()
-  const currentStep = 4
-  const totalSteps = 15
-  const progressPercentage = (currentStep / totalSteps) * 100
+  const progressPercentage = calculateProgress(4)
 
   return (
     <div className="flex min-h-screen flex-col bg-background p-6">
@@ -28,4 +27,3 @@ export default function Step4() {
     </div>
   )
 }
-

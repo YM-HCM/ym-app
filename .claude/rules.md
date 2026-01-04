@@ -28,10 +28,54 @@
 - Only create custom components if shadcn doesn't have it
 - Follow shadcn patterns: variants with `class-variance-authority`, extend HTML element props
 
-### Styling
-- Tailwind utility classes (prefer over custom CSS)
-- Design tokens in `tailwind.config.js`
-- Use `cn()` for conditional classes
+### Styling & Design System
+- **Tailwind utility classes** (prefer over custom CSS)
+- **Design tokens** defined in `tailwind.config.js` and `globals.css`
+- Use `cn()` from `@/lib/utils` for conditional/merged classes
+
+#### Color Palette (STRICTLY USE THESE)
+Only use the design system colors - NEVER introduce custom colors:
+- `bg-background` / `text-foreground` - main background/text
+- `bg-primary` / `text-primary-foreground` - buttons, icons, emphasis
+- `bg-secondary` / `text-secondary-foreground` - secondary actions
+- `bg-muted` / `text-muted-foreground` - subtle backgrounds, helper text
+- `bg-accent` / `text-accent-foreground` - hover states
+- `bg-destructive` / `text-destructive-foreground` - errors, danger actions
+- `bg-card` / `text-card-foreground` - card backgrounds
+- `border-border` / `border-input` - borders
+- `ring-ring` - focus rings
+
+#### Typography
+- **Font**: Geist Sans (loaded in `layout.tsx` via `next/font/google`)
+  - CSS variable: `--font-geist-sans`
+  - Tailwind class: `font-sans` (configured in `tailwind.config.js`)
+- **Monospace**: Geist Mono for code (`font-mono` / `--font-geist-mono`)
+- Use Tailwind's type scale: `text-sm`, `text-base`, `text-lg`, `text-xl`, etc.
+- Font weights: `font-normal`, `font-medium`, `font-semibold`, `font-bold`
+- Letter spacing: `tracking-tight` for headings
+
+#### Spacing & Layout
+- Use Tailwind spacing scale (p-4, gap-6, etc.)
+- Mobile-first responsive: `sm:`, `md:`, `lg:` breakpoints
+- Standard padding: `p-6` for page containers
+- Consistent gaps: `gap-2` (tight), `gap-4` (normal), `gap-6` (spacious)
+
+#### Border Radius
+- Use design tokens: `rounded-sm`, `rounded-md`, `rounded-lg` (from `--radius`)
+- Icons/avatars: `rounded-2xl` or `rounded-full`
+
+#### Animations (keep subtle)
+- Transitions: `transition-all duration-300` or `duration-500`
+- Hover effects: `hover:scale-[1.02]`, `hover:bg-accent`
+- Entry animations: opacity + translate with staggered delays
+
+#### ❌ DO NOT
+- Use arbitrary colors (e.g., `bg-amber-500`, `text-orange-600`, `from-rose-50`)
+- Add gradient backgrounds unless part of design system
+- Override Button styles with custom gradient classes
+- Use colors not in the design system palette
+- Add decorative patterns or textures
+- Import external fonts beyond Geist
 
 ### Authentication & Supabase
 - Supabase client: `@/lib/supabase`

@@ -3,12 +3,11 @@
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { calculateProgress } from "./constants"
 
 export default function Step5() {
   const router = useRouter()
-  const currentStep = 5
-  const totalSteps = 15
-  const progressPercentage = (currentStep / totalSteps) * 100
+  const progressPercentage = calculateProgress(5)
 
   return (
     <div className="flex min-h-screen flex-col bg-background p-6">
@@ -21,11 +20,10 @@ export default function Step5() {
         </h1>
       </div>
       <div className="flex w-full items-center justify-center pb-4">
-        <Button onClick={() => router.push("/onboarding?step=6")} className="w-60">
-          Next
+        <Button onClick={() => router.push("/home")} className="w-60">
+          Complete Onboarding
         </Button>
       </div>
     </div>
   )
 }
-
