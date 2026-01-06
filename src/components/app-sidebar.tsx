@@ -120,7 +120,7 @@ export function AppSidebar() {
                 tooltip="Open sidebar"
               >
                 {isHoveringCollapsed ? (
-                  <PanelLeft className="!size-6" />
+                  <PanelLeft className="!size-4" />
                 ) : (
                   <Image
                     src="/favicon.ico"
@@ -133,7 +133,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             ) : (
               /* When expanded: show logo with app name */
-              <SidebarMenuButton size="lg" className="cursor-default hover:bg-transparent">
+              <SidebarMenuButton size="lg" className="pointer-events-none select-none" tabIndex={-1}>
                 <Image
                   src="/favicon.ico"
                   alt="Young Muslims"
@@ -221,30 +221,27 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-48 rounded-lg"
+                className="min-w-40 rounded-lg"
                 side="top"
                 align="start"
                 sideOffset={4}
               >
-                <DropdownMenuItem onClick={handleViewProfile}>
-                  <User className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={handleViewProfile} className="text-sm">
+                  <User className="mr-2 h-3.5 w-3.5" />
                   View Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={handleFeedback} className="text-sm">
+                  <MessageSquare className="mr-2 h-3.5 w-3.5" />
+                  Share Feedback
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut} className="text-sm">
+                  <LogOut className="mr-2 h-3.5 w-3.5" />
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
 
-          {/* Share Feedback */}
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Share Feedback" onClick={handleFeedback}>
-              <MessageSquare />
-              <span>Share Feedback</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
