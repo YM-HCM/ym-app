@@ -1,28 +1,53 @@
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { CheckCircle } from "lucide-react"
+import { CheckCircle, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { useOnboarding } from "@/contexts/OnboardingContext"
+import { useAuth } from "@/contexts/AuthContext"
+import { saveOnboardingData } from "@/lib/supabase/onboarding"
 import { calculateProgress } from "./constants"
 
 export default function Step7() {
   const router = useRouter()
-  const { clearData } = useOnboarding()
+  const { data, clearData } = useOnboarding()
+  const { user } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const progressPercentage = calculateProgress(7)
 
   const handleComplete = async () => {
-    // TODO: Save all onboarding data to Supabase
-    // TODO: Set onboarding_completed_at timestamp on user record
+    if (!user?.id) {
+      setError("You must be logged in to complete onboarding")
+      return
+    }
 
-    // Clear context data after saving
-    clearData()
+    setIsSubmitting(true)
+    setError(null)
 
-    // Navigate to home/dashboard
-    router.push("/home")
+    try {
+      const result = await saveOnboardingData(user.id, data)
+
+      if (!result.success) {
+        setError(result.error || "Failed to save your profile. Please try again.")
+        setIsSubmitting(false)
+        return
+      }
+
+      // Clear context data after saving
+      clearData()
+
+      // Navigate to home/dashboard
+      router.push("/home")
+    } catch (err) {
+      console.error("Error completing onboarding:", err)
+      setError("An unexpected error occurred. Please try again.")
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -50,10 +75,28 @@ export default function Step7() {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 w-full max-w-md mx-auto rounded-md bg-destructive/10 p-4 text-center text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
       {/* Navigation Button */}
       <div className="flex w-full items-center justify-center pb-4">
-        <Button onClick={handleComplete} className="w-60">
-          Go to Dashboard
+        <Button
+          onClick={handleComplete}
+          className="w-60"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            "Go to Dashboard"
+          )}
         </Button>
       </div>
     </div>
