@@ -10,19 +10,20 @@
 
 ## Database
 
-### Schema
-- [ ] Finalize data model (answer open questions in `database-schema.md`)
-- [ ] Write migration SQL to drop old tables
-- [ ] Write migration SQL to create new tables
-- [ ] Apply migrations to Supabase
+### Schema ✅ COMPLETE
+- [x] Finalize data model (answer open questions in `database-schema.md`)
+- [x] Write migration SQL to drop old tables — `supabase/migrations/00001_drop_old_tables.sql`
+- [x] Write migration SQL to create new tables — `supabase/migrations/00003_create_tables.sql`
+- [x] Create enums — `supabase/migrations/00002_create_enums.sql`
+- [x] Apply migrations to Supabase — All 10 tables live with RLS enabled
 
-### Seed Data
-- [ ] Seed `role_types` (20 roles defined)
-- [ ] Seed `departments` (8 departments)
+### Seed Data (Partial)
+- [x] Seed `role_types` (19 roles) — `supabase/migrations/00004_seed_data.sql`
+- [x] Seed `departments` (8 departments)
 - [ ] Seed `teams` (per department)
-- [ ] Seed `regions`
-- [ ] Seed `subregions`
-- [ ] Seed `neighbor_nets`
+- [x] Seed `regions` (sample: Texas)
+- [x] Seed `subregions` (sample: Houston, Dallas)
+- [x] Seed `neighbor_nets` (sample: Katy NN, Sugar Land NN, Downtown NN)
 - [ ] Pre-populate `users` from NN database + alumni
 - [ ] Pre-populate `role_assignments` (current leadership)
 - [ ] Pre-populate `memberships`
@@ -30,13 +31,14 @@
 ### Static Data Prepared
 - [x] US Universities list — 6,429 universities in `src/data/us-universities.json` (converted from CSV)
 
-### Auth
-- [ ] Implement GSuite auth trigger (link users on first login)
-- [ ] Add "Before User Created" hook (restrict to @youngmuslims.com)
+### Auth ✅ COMPLETE
+- [x] Implement GSuite auth trigger (link users on first login) — `supabase/migrations/00005_auth_trigger.sql`
+- [ ] Add "Before User Created" hook (restrict to @youngmuslims.com) — optional extra layer
 - [ ] Update OAuth client IDs for production
 
-### Security
-- [ ] Add RLS policies
+### Security ✅ COMPLETE
+- [x] Add RLS policies — `supabase/migrations/00006_rls_policies.sql`
+- [x] Code review fixes — `supabase/migrations/00007_review_fixes.sql` (run this in Supabase!)
 
 ---
 
@@ -61,12 +63,16 @@
 - [ ] Handle onboarding state (redirect if incomplete)
 - [ ] Save onboarding data to Supabase
 
-### Onboarding Data Integration (currently using placeholders)
-- [ ] Step 2: Fetch subregions from Supabase (currently hardcoded)
-- [ ] Step 2: Fetch NeighborNets from Supabase filtered by subregion
+### Onboarding Data Integration ⚡ READY TO CONNECT
+> **Database is live!** These can now be implemented.
+
+- [ ] Step 2: Fetch subregions from Supabase (table: `subregions`)
+- [ ] Step 2: Fetch NeighborNets from Supabase filtered by subregion (table: `neighbor_nets`)
 - [ ] Step 3: Fetch Amir/Manager list from Supabase users table
 - [ ] Step 4: Fetch Amir/Manager list from Supabase users table
-- [ ] Step 6: Define skills list (currently hardcoded placeholder)
+- [ ] Step 5: Education data saves to `users.education` JSONB field
+- [ ] Step 6: Skills save to `users.skills` TEXT[] field
+- [ ] Step 7: Set `users.onboarding_completed_at` on completion
 
 ### Landing Page (Home)
 - [x] Design landing page (what does user see after onboarding?) — Personal context card + quick actions
@@ -83,19 +89,31 @@
 
 ### People Page
 - [x] Build people page — `/people` placeholder with "Coming soon"
-- [ ] Design people directory
+- [x] Design people directory — `docs/plans/2026-01-09-people-directory-design.md`
 - [ ] Browse/search all YM members
 - [ ] Filter by region/subregion/NN/role
+- [ ] Advanced filtering: project type, project role, skills, years in YM
+- [ ] Switchable card/table views
+- [ ] Copy emails to clipboard action
+
+#### Future: Org Chart (Deferred)
+- [ ] Org Chart — visual hierarchy explorer (separate from directory)
+  - **Option A:** Simpler org chart — Geographic hierarchy only (Region → Subregion → NN)
+  - **Option B:** Scoped org charts by track — "Geographic", "Cabinet", "Cloud" as separate views
+  - Consider how to handle cross-cutting roles (NS members hold multiple functional roles)
+  - Navigation: TBD — explore alternatives to tabs/nested sidebar
 
 ---
 
-## Integration (When DB + UI Converge)
+## Integration (When DB + UI Converge) ⚡ NEXT PRIORITY
 
+> **Database is deployed.** Start connecting UI to Supabase.
+
+- [ ] **Generate TypeScript types from schema** — `npx supabase gen types typescript`
 - [ ] Connect onboarding form to users table
 - [ ] Connect profile page to user data
 - [ ] Connect people page to users + roles
 - [ ] Connect landing page to role_assignments
-- [ ] Generate TypeScript types from schema
 - [ ] Test end-to-end auth flow
 
 ---
@@ -161,14 +179,14 @@
 > The skill will guide you through creating distinctive, production-grade UI with motion.
 
 ### Priority 1: Page Transitions (Foundation)
-- [ ] Install framer-motion: `npm install framer-motion`
+- [ ] Install framer-motion: `bun add framer-motion`
 - [ ] Create `OnboardingTransition` wrapper component
 - [ ] Wrap each step's content with animated enter/exit
 - [ ] Direction-aware: forward slides left, back slides right
 - [ ] Smooth fade + translate (opacity 0→1, x: ±20px → 0)
 
 ### Priority 2: Step 7 Celebration (Memorable Ending)
-- [ ] Install confetti library: `npm install canvas-confetti`
+- [ ] Install confetti library: `bun add canvas-confetti`
 - [ ] Animated SVG checkmark that draws itself on mount
 - [ ] Confetti burst triggered on page load
 - [ ] Personalized message using user's name from context
@@ -210,4 +228,3 @@
 - **Current issue:** Every step looks identical (monotonous layout)
 - **Color:** Currently pure grayscale—consider adding one accent color
 - **Typography:** Using default font-sans—consider a display font for headings
-
