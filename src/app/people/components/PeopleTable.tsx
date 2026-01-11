@@ -104,7 +104,7 @@ export function PeopleTable({ people }: PeopleTableProps) {
       },
       {
         id: 'region',
-        accessorFn: (row) => row.region.name,
+        accessorFn: (row) => row.region?.name ?? '',
         header: ({ column }) => {
           const isSorted = column.getIsSorted()
           return (
@@ -124,7 +124,7 @@ export function PeopleTable({ people }: PeopleTableProps) {
             </Button>
           )
         },
-        cell: ({ row }) => row.original.region.name,
+        cell: ({ row }) => row.original.region?.name ?? '—',
       },
       {
         id: 'subregion',

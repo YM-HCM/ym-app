@@ -26,7 +26,7 @@ export function PersonCard({ person }: PersonCardProps) {
   }
 
   // Get location display (prefer subregion, fallback to region)
-  const location = person.subregion?.name ?? person.region.name
+  const location = person.subregion?.name ?? person.region?.name ?? 'No location'
 
   // Get initials for avatar fallback
   const initials = `${person.firstName.charAt(0)}${person.lastName.charAt(0)}`

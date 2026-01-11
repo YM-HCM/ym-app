@@ -2,7 +2,20 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import type { PersonListItem, PeopleFilters } from '../types'
-import { getInitialFilters } from '../mock-data'
+
+function getInitialFilters(): PeopleFilters {
+  return {
+    search: '',
+    regions: [],
+    subregions: [],
+    neighborNets: [],
+    roles: [],
+    projectTypes: [],
+    projectRoles: [],
+    skills: [],
+    yearsInYM: undefined,
+  }
+}
 
 interface UsePeopleFiltersReturn {
   filters: PeopleFilters
@@ -54,7 +67,7 @@ export function usePeopleFilters(people: PersonListItem[]): UsePeopleFiltersRetu
 
       // Region filter
       if (filters.regions.length > 0) {
-        if (!filters.regions.includes(person.region.id)) {
+        if (!person.region || !filters.regions.includes(person.region.id)) {
           return false
         }
       }

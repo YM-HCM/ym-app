@@ -7,22 +7,13 @@ export interface PersonListItem {
   lastName: string
   avatarUrl?: string
   email: string // For copy emails feature
-  region: {
-    id: string
-    name: string
-  }
-  subregion?: {
-    id: string
-    name: string
-  }
-  neighborNet?: {
-    id: string
-    name: string
-  }
+  region: { id: string; name: string } | null
+  subregion: { id: string; name: string } | null
+  neighborNet: { id: string; name: string } | null
   roles: {
     id: string
     name: string
-    category: 'ns' | 'council' | 'regional' | 'subregional' | 'neighbor_net' | 'cabinet' | 'cloud'
+    category: string
   }[]
   skills: string[]
   yearsInYM?: number // Calculated from membership.joined_at
