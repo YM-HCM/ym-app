@@ -75,10 +75,10 @@
 - [x] Step 6: Skills save to `users.skills` TEXT[] field
 - [x] Step 7: Set `users.onboarding_completed_at` on completion
 
-### Landing Page (Home)
+### Landing Page (Home) ✅ COMPLETE
 - [x] Design landing page (what does user see after onboarding?) — Personal context card + quick actions
 - [x] Build landing page — `/home` with `AppShell`, `PersonalContextCard`, `QuickActionCard`
-- [ ] Show user's role(s) — currently mock data, needs DB integration
+- [x] Show user's role(s) — connected to Supabase
 
 ### Profile Page ✅ COMPLETE
 - [x] Design profile page — Expandable card sections with inline editing
@@ -112,10 +112,10 @@
 - [ ] **Back to directory navigation**
 - See design doc Phase 5: `docs/plans/2026-01-09-people-directory-design.md#L362-L365`
 
-#### Cleanup Before Production
+#### Cleanup Before Production ✅ COMPLETE
 - [x] Remove `/people-preview` test route
 - [x] Remove middleware exception for `/people-preview`
-- [ ] Connect to real Supabase data (blocked by Integration section below)
+- [x] Connect to real Supabase data
 
 #### Future: Org Chart (Deferred)
 - [ ] Org Chart — visual hierarchy explorer (separate from directory)
@@ -126,13 +126,13 @@
 
 ---
 
-## Integration (When DB + UI Converge)
+## Integration (When DB + UI Converge) ✅ COMPLETE
 
 - [x] Connect onboarding form to users table
 - [x] Connect profile page to user data
-- [ ] **Generate TypeScript types from schema** — `npx supabase gen types typescript`
-- [ ] Connect people page to users + roles
-- [ ] Connect landing page to role_assignments
+- [x] **Generate TypeScript types from schema** — `bun run db:types`
+- [x] Connect people page to users + roles
+- [x] Connect landing page to role_assignments
 - [ ] Test end-to-end auth flow
 
 ---
