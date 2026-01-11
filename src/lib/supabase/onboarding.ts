@@ -214,8 +214,9 @@ export async function fetchOnboardingData(authId: string): Promise<{
 
 /**
  * Helper to get internal user ID from auth ID
+ * Returns specific error messages to help with debugging
  */
-async function getUserId(authId: string): Promise<string | null> {
+async function getUserId(authId: string): Promise<{ id: string | null; error?: string }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('users')
@@ -223,8 +224,20 @@ async function getUserId(authId: string): Promise<string | null> {
     .eq('auth_id', authId)
     .single()
 
-  if (error || !data) return null
-  return data.id
+  if (error) {
+    // PGRST116 = no rows returned
+    if (error.code === 'PGRST116') {
+      return { id: null, error: 'User not found' }
+    }
+    console.error('Database error in getUserId:', error)
+    return { id: null, error: 'Database connection error' }
+  }
+
+  if (!data) {
+    return { id: null, error: 'User not found' }
+  }
+
+  return { id: data.id }
 }
 
 /**
@@ -237,8 +250,9 @@ export async function saveStep1(authId: string, data: {
   dateOfBirth?: Date
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userId = await getUserId(authId)
-  if (!userId) return { success: false, error: 'User not found' }
+  const userResult = await getUserId(authId)
+  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+  const userId = userResult.id
 
   const { error } = await supabase
     .from('users')
@@ -266,20 +280,26 @@ export async function saveStep2(authId: string, data: {
   neighborNetId?: string
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userId = await getUserId(authId)
-  if (!userId) return { success: false, error: 'User not found' }
+  const userResult = await getUserId(authId)
+  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+  const userId = userResult.id
 
   if (!data.neighborNetId) {
     return { success: true } // No location to save
   }
 
   // Check for existing active membership
-  const { data: existingMembership } = await supabase
+  const { data: existingMembership, error: fetchError } = await supabase
     .from('memberships')
     .select('id')
     .eq('user_id', userId)
     .eq('status', 'active')
-    .single()
+    .maybeSingle()
+
+  if (fetchError) {
+    console.error('Error fetching membership:', fetchError)
+    return { success: false, error: 'Failed to check existing membership' }
+  }
 
   if (existingMembership) {
     // Update existing membership
@@ -320,8 +340,9 @@ export async function saveStep3(authId: string, data: {
   ymRoles?: YMRoleEntry[]
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userId = await getUserId(authId)
-  if (!userId) return { success: false, error: 'User not found' }
+  const userResult = await getUserId(authId)
+  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+  const userId = userResult.id
 
   // Get existing role IDs before modifying
   const { data: existingRoles } = await supabase
@@ -389,8 +410,9 @@ export async function saveStep4(authId: string, data: {
   ymProjects?: YMProjectEntry[]
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userId = await getUserId(authId)
-  if (!userId) return { success: false, error: 'User not found' }
+  const userResult = await getUserId(authId)
+  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+  const userId = userResult.id
 
   // Get existing project IDs before modifying
   const { data: existingProjects } = await supabase
@@ -455,8 +477,9 @@ export async function saveStep5(authId: string, data: {
   education?: EducationEntry[]
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userId = await getUserId(authId)
-  if (!userId) return { success: false, error: 'User not found' }
+  const userResult = await getUserId(authId)
+  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+  const userId = userResult.id
 
   const { error } = await supabase
     .from('users')
@@ -481,8 +504,9 @@ export async function saveStep6(authId: string, data: {
   skills?: string[]
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userId = await getUserId(authId)
-  if (!userId) return { success: false, error: 'User not found' }
+  const userResult = await getUserId(authId)
+  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+  const userId = userResult.id
 
   const { error } = await supabase
     .from('users')
@@ -504,8 +528,9 @@ export async function saveStep6(authId: string, data: {
  */
 export async function completeOnboarding(authId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userId = await getUserId(authId)
-  if (!userId) return { success: false, error: 'User not found' }
+  const userResult = await getUserId(authId)
+  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+  const userId = userResult.id
 
   const { error } = await supabase
     .from('users')

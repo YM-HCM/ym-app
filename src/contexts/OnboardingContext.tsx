@@ -115,16 +115,18 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [isComplete, setIsComplete] = useState(false)
 
   // Fetch existing data when user is available
+  // Use primitive userId instead of user object to prevent infinite loops
+  const userId = user?.id
   useEffect(() => {
     async function loadExistingData() {
-      if (!user?.id) {
+      if (!userId) {
         setIsLoading(false)
         return
       }
 
       setIsLoading(true)
       try {
-        const result = await fetchOnboardingData(user.id)
+        const result = await fetchOnboardingData(userId)
         if (result.data) {
           setData(result.data)
           setIsComplete(result.isComplete)
@@ -137,7 +139,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }
 
     loadExistingData()
-  }, [user?.id])
+  }, [userId])
 
   const updateData = useCallback((partial: Partial<OnboardingData>) => {
     setData(prev => ({ ...prev, ...partial }))
