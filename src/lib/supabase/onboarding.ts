@@ -6,6 +6,7 @@ import type {
   EducationEntry,
   EducationLevel
 } from '@/contexts/OnboardingContext'
+import type { Json } from '@/types/database.types'
 
 // ============================================
 // TYPES
@@ -485,7 +486,7 @@ export async function saveStep5(authId: string, data: {
     .from('users')
     .update({
       education_level: data.educationLevel || null,
-      education: data.education || []
+      education: (data.education || []) as unknown as Json
     })
     .eq('id', userId)
 

@@ -3,14 +3,21 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { ProfileFormState } from './useProfileForm'
-import type {
-  User,
-  RoleAssignment,
-  UserProject,
-  Membership,
-  EducationJson,
-} from '@/types/supabase'
+import type { Tables } from '@/types/database.types'
 import type { YMRoleEntry, YMProjectEntry, EducationEntry, EducationLevel } from '@/contexts/OnboardingContext'
+
+// Type aliases for cleaner code
+type RoleAssignment = Tables<'role_assignments'>
+type UserProject = Tables<'user_projects'>
+
+// Education entry stored as JSONB in users table
+interface EducationJson {
+  school_name?: string
+  school_custom?: string
+  degree_type?: string
+  field_of_study?: string
+  graduation_year?: number
+}
 
 interface UseProfileDataReturn {
   profileData: ProfileFormState | null
@@ -191,7 +198,7 @@ export function useProfileData(): UseProfileDataReturn {
         ymRoles: transformRoles(rolesResult.data ?? []),
         ymProjects: transformProjects(projectsResult.data ?? []),
         educationLevel: (user.education_level as EducationLevel) ?? undefined,
-        education: transformEducation(user.education ?? []),
+        education: transformEducation((user.education ?? []) as EducationJson[]),
         skills: user.skills ?? [],
       }
 

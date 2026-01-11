@@ -2,15 +2,15 @@
 
 import { createClient } from '@/lib/supabase/client'
 import type { ProfileFormState } from '../hooks/useProfileForm'
-import type { EducationJson } from '@/types/supabase'
+import type { Json } from '@/types/database.types'
 
 interface SaveProfileResult {
   success: boolean
   error?: string
 }
 
-// Transform form education entries to DB format
-function transformEducationToDb(education: ProfileFormState['education']): EducationJson[] {
+// Transform form education entries to DB format (returns Json-compatible array)
+function transformEducationToDb(education: ProfileFormState['education']): Json {
   if (!education) return []
   return education.map((edu) => ({
     school_name: edu.schoolName,
