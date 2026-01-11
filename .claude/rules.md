@@ -85,11 +85,7 @@ Only use the design system colors - NEVER introduce custom colors:
 - Use shadcn `Badge` for counters/indicators
 
 #### Responsive Testing
-Test at these breakpoints:
-- **Small iOS**: 375px (iPhone SE / Mini)
-- **Standard iOS**: 393px (iPhone 16)
-- **Large iOS**: 430px (iPhone 16 Pro Max)
-- **Desktop**: 1280px+
+Test at: 375px (Small iOS), 393px (iPhone 16), 430px (Pro Max), 1280px+ (Desktop)
 
 #### Glassmorphism (use sparingly)
 - Only for overlays and floating elements, not general containers
