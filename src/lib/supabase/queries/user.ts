@@ -41,7 +41,8 @@ export async function fetchUserContext(userId: string): Promise<UserContext | nu
     .eq('is_active', true)
 
   // Fetch active membership with geographic info
-  const { data: membership } = await supabase
+  // Use maybeSingle() instead of single() to gracefully handle users without memberships
+  const { data: membership, error: membershipError } = await supabase
     .from('memberships')
     .select(`
       *,
@@ -54,7 +55,12 @@ export async function fetchUserContext(userId: string): Promise<UserContext | nu
     `)
     .eq('user_id', user.id)
     .eq('status', 'active')
-    .single()
+    .maybeSingle()
+
+  // Log non-PGRST116 errors (PGRST116 is "no rows found" which is expected)
+  if (membershipError && membershipError.code !== 'PGRST116') {
+    console.error('Error fetching membership:', membershipError)
+  }
 
   // Build role names
   const roles = roleAssignments?.map((ra) => {

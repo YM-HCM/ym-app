@@ -152,6 +152,12 @@ export async function fetchFilterCategories(): Promise<FilterCategories> {
     supabase.from('role_types').select('id, name').order('name'),
   ])
 
+  // Log any errors from filter queries
+  if (regionsRes.error) console.error('Error fetching regions:', regionsRes.error)
+  if (subregionsRes.error) console.error('Error fetching subregions:', subregionsRes.error)
+  if (neighborNetsRes.error) console.error('Error fetching neighbor_nets:', neighborNetsRes.error)
+  if (roleTypesRes.error) console.error('Error fetching role_types:', roleTypesRes.error)
+
   // Get unique skills from users
   const { data: users } = await supabase
     .from('users')

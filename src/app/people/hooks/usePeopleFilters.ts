@@ -99,7 +99,7 @@ export function usePeopleFilters(people: PersonListItem[]): UsePeopleFiltersRetu
         // Match on skill name (case-insensitive)
         const personSkillsLower = person.skills.map((s) => s.toLowerCase())
         const hasMatchingSkill = filters.skills.some((skillId) => {
-          // Skills are stored as names in mock data, so match by converting ID to name-like format
+          // Skill IDs are generated as lowercase-hyphenated names, convert back to match
           const skillName = skillId.replace(/-/g, ' ')
           return personSkillsLower.some((s) => s.includes(skillName))
         })
