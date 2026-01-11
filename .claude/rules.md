@@ -121,18 +121,6 @@ Test at these breakpoints:
 - Primary auth: Google OAuth
 - Always handle loading/error states
 
-### File Organization
-```
-src/
-├── app/              # Next.js App Router pages
-├── components/       # React components
-│   ├── ui/          # shadcn/ui components
-│   └── auth/        # Auth-related components
-├── contexts/        # React contexts
-├── lib/             # Utility functions and configurations
-└── middleware.ts    # Next.js middleware
-```
-
 ### Database Operations
 
 **✅ Correct - Insert-First-Then-Delete Pattern:**
