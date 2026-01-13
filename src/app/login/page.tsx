@@ -13,9 +13,6 @@ export default function LoginPage() {
   const router = useRouter()
 
   // Redirect if already logged in
-  // TODO: Make this dynamic - check if user has completed onboarding
-  // If onboarding_completed: redirect to /home
-  // If not completed: redirect to /onboarding?step=1
   useEffect(() => {
     if (user && !loading) {
       router.push('/onboarding?step=1')
@@ -33,7 +30,6 @@ export default function LoginPage() {
   }, [loading])
 
   const handleGoogleSuccess = () => {
-    // TODO: Make this dynamic based on onboarding completion status
     router.push('/onboarding?step=1')
   }
 

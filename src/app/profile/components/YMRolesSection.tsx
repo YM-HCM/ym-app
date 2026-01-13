@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { UserX } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,6 +13,7 @@ import { DateRangeInput } from '@/components/date-range-input'
 import { ExpandableCard, ExpandableCardList } from './ExpandableCard'
 import { useProfileMode } from '@/contexts/ProfileModeContext'
 import type { YMRoleEntry } from '@/contexts/OnboardingContext'
+import { fetchAllUsersForSelection } from '@/lib/supabase/queries/users'
 
 // YM Role types from step3-ym-roles.tsx
 const YM_ROLES: ComboboxOption[] = [
@@ -36,15 +37,6 @@ const YM_ROLES: ComboboxOption[] = [
   { value: 'dept_head', label: 'Department Head' },
   { value: 'team_lead', label: 'Team Lead' },
   { value: 'team_member', label: 'Team Member' },
-]
-
-// TODO: Fetch from Supabase users table
-const PLACEHOLDER_AMIRS: ComboboxOption[] = [
-  { value: 'user-1', label: 'Ahmed Hassan' },
-  { value: 'user-2', label: 'Fatima Al-Said' },
-  { value: 'user-3', label: 'Omar Khan' },
-  { value: 'user-4', label: 'Yasmin Ibrahim' },
-  { value: 'user-5', label: 'Khalid Mohammed' },
 ]
 
 function getRoleTitle(role: YMRoleEntry): string {
@@ -94,6 +86,17 @@ export function YMRolesSection({
 }: YMRolesSectionProps) {
   const { isEditable } = useProfileMode()
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [amirOptions, setAmirOptions] = useState<ComboboxOption[]>([])
+
+  useEffect(() => {
+    async function loadAmirs() {
+      const { data } = await fetchAllUsersForSelection()
+      if (data) {
+        setAmirOptions(data)
+      }
+    }
+    loadAmirs()
+  }, [])
 
   const getRoleComboboxValue = (role: YMRoleEntry): ComboboxValue | undefined => {
     if (role.roleTypeId) {
@@ -108,7 +111,7 @@ export function YMRolesSection({
 
   const getAmirComboboxValue = (role: YMRoleEntry): ComboboxValue | undefined => {
     if (role.amirUserId) {
-      const option = PLACEHOLDER_AMIRS.find(a => a.value === role.amirUserId)
+      const option = amirOptions.find(a => a.value === role.amirUserId)
       return { type: 'existing', value: role.amirUserId, label: option?.label }
     }
     if (role.amirCustomName) {
@@ -139,7 +142,7 @@ export function YMRolesSection({
 
   const getAmirDisplay = (role: YMRoleEntry): string => {
     if (role.amirUserId) {
-      const option = PLACEHOLDER_AMIRS.find(a => a.value === role.amirUserId)
+      const option = amirOptions.find(a => a.value === role.amirUserId)
       return option?.label || role.amirUserId
     }
     if (role.amirCustomName) {
@@ -191,7 +194,7 @@ export function YMRolesSection({
               <div className="space-y-1.5">
                 <Label>Amir / Manager</Label>
                 <SearchableCombobox
-                  options={PLACEHOLDER_AMIRS}
+                  options={amirOptions}
                   value={getAmirComboboxValue(role)}
                   onChange={(value) => handleAmirChange(index, value)}
                   placeholder="Select or add a person"

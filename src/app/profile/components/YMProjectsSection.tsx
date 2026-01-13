@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Briefcase } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -14,6 +14,7 @@ import { DateRangeInput } from '@/components/date-range-input'
 import { ExpandableCard, ExpandableCardList } from './ExpandableCard'
 import { useProfileMode } from '@/contexts/ProfileModeContext'
 import type { YMProjectEntry } from '@/contexts/OnboardingContext'
+import { fetchAllUsersForSelection } from '@/lib/supabase/queries/users'
 
 // Project types (can be expanded)
 const PROJECT_TYPES: ComboboxOption[] = [
@@ -29,15 +30,6 @@ const PROJECT_TYPES: ComboboxOption[] = [
   { value: 'tech', label: 'Technology Project' },
   { value: 'media', label: 'Media/Content' },
   { value: 'other', label: 'Other' },
-]
-
-// TODO: Fetch from Supabase users table
-const PLACEHOLDER_AMIRS: ComboboxOption[] = [
-  { value: 'user-1', label: 'Ahmed Hassan' },
-  { value: 'user-2', label: 'Fatima Al-Said' },
-  { value: 'user-3', label: 'Omar Khan' },
-  { value: 'user-4', label: 'Yasmin Ibrahim' },
-  { value: 'user-5', label: 'Khalid Mohammed' },
 ]
 
 function getProjectTitle(project: YMProjectEntry): string {
@@ -91,6 +83,17 @@ export function YMProjectsSection({
 }: YMProjectsSectionProps) {
   const { isEditable } = useProfileMode()
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [amirOptions, setAmirOptions] = useState<ComboboxOption[]>([])
+
+  useEffect(() => {
+    async function loadAmirs() {
+      const { data } = await fetchAllUsersForSelection()
+      if (data) {
+        setAmirOptions(data)
+      }
+    }
+    loadAmirs()
+  }, [])
 
   const getProjectComboboxValue = (project: YMProjectEntry): ComboboxValue | undefined => {
     if (project.projectType) {
@@ -105,7 +108,7 @@ export function YMProjectsSection({
 
   const getAmirComboboxValue = (project: YMProjectEntry): ComboboxValue | undefined => {
     if (project.amirUserId) {
-      const option = PLACEHOLDER_AMIRS.find(a => a.value === project.amirUserId)
+      const option = amirOptions.find(a => a.value === project.amirUserId)
       return { type: 'existing', value: project.amirUserId, label: option?.label }
     }
     if (project.amirCustomName) {
@@ -136,7 +139,7 @@ export function YMProjectsSection({
 
   const getAmirDisplay = (project: YMProjectEntry): string => {
     if (project.amirUserId) {
-      const option = PLACEHOLDER_AMIRS.find(a => a.value === project.amirUserId)
+      const option = amirOptions.find(a => a.value === project.amirUserId)
       return option?.label || project.amirUserId
     }
     if (project.amirCustomName) {
@@ -197,7 +200,7 @@ export function YMProjectsSection({
             <div className="space-y-1.5">
               <Label>Project Lead / Amir</Label>
               <SearchableCombobox
-                options={PLACEHOLDER_AMIRS}
+                options={amirOptions}
                 value={getAmirComboboxValue(project)}
                 onChange={(value) => handleAmirChange(index, value)}
                 placeholder="Select or add a person"
