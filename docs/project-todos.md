@@ -35,7 +35,7 @@
 
 ### Auth ✅ COMPLETE
 - [x] Implement GSuite auth trigger (link users on first login) — `supabase/migrations/00005_auth_trigger.sql`
-- [ ] Add "Before User Created" hook (restrict to @youngmuslims.com) — optional extra layer
+- [x] Multi-layer domain validation (Google OAuth hint, client-side, middleware) — sufficient for internal app
 - [ ] Update OAuth client IDs for production
 
 ### Security ✅ COMPLETE

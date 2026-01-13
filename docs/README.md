@@ -31,6 +31,7 @@ Young Muslim's proprietary application that serves to create a database of organ
 - **Bun** - Fast JavaScript runtime and package manager
 - **ESLint 9** - Code linting
 - **Vitest 4** - Unit testing framework
+- **Playwright** - E2E testing framework
 - **PostCSS 8** - CSS processing
 - **Autoprefixer** - CSS vendor prefixing
 
@@ -72,28 +73,28 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 ## Testing
 
-### Run Tests
+### Unit Tests
 
 ```bash
-# Run all tests once
+# Run all unit tests once
 bun test
 
 # Run tests in watch mode (re-runs on file changes)
 bun run test:watch
 ```
 
-### Test Structure
-
-Tests live alongside source files with `.test.ts` or `.spec.ts` suffix:
+**Test Structure:** Tests live alongside source files with `.test.ts` or `.spec.ts` suffix:
 
 ```
 src/
   lib/
     utils.ts        # Source file
     utils.test.ts   # Test file
+    validation.ts   # Validation functions
+    validation.test.ts  # 23 test cases
 ```
 
-### Writing Tests
+**Writing Tests:**
 
 ```typescript
 import { describe, it, expect } from 'vitest'
@@ -106,13 +107,35 @@ describe('myFunction', () => {
 })
 ```
 
+### E2E Tests
+
+```bash
+# Run E2E tests (starts dev server automatically)
+bun run test:e2e
+
+# Run E2E tests with UI mode (interactive)
+bun run test:e2e:ui
+```
+
+**Test Structure:** E2E tests live in the `e2e/` directory:
+
+```
+e2e/
+  example.spec.ts   # Smoke tests (homepage, login)
+```
+
+**Note:** E2E tests require Chromium browser. Install with:
+```bash
+bunx playwright install chromium
+```
+
 ### CI/CD
 
 Tests run automatically on:
 - Every push to `main`
 - Every pull request targeting `main`
 
-The CI pipeline runs: **lint → test → build**. All must pass for PRs to be mergeable.
+The CI pipeline runs: **lint → typecheck → test → build**. All must pass for PRs to be mergeable.
 
 <br>
 
@@ -156,4 +179,3 @@ External documents that may be relevant for understanding the data model and org
 
 todos:
 - update oauth client ids in google cloud console once ready to go live
-- add a "Add a Before User Created" auth hook, to ensure supabase never creates non @youngmuslims.com user accounts
