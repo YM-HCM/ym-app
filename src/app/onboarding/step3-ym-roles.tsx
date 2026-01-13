@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, Plus, X } from "lucide-react"
+import { Plus, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -16,7 +15,12 @@ import {
 } from "@/components/searchable-combobox"
 import { DateRangeInput } from "@/components/date-range-input"
 import { useOnboarding, YMRoleEntry } from "@/contexts/OnboardingContext"
-import { calculateProgress } from "./constants"
+import {
+  OnboardingLayout,
+  OnboardingContent,
+  OnboardingLoadingState,
+  OnboardingErrorState,
+} from "./components"
 import { fetchRoleTypes, type RoleType } from "@/lib/supabase/queries/roles"
 import { fetchCompletedUsers, type UserOption } from "@/lib/supabase/queries/users"
 
@@ -76,8 +80,6 @@ export default function Step3() {
       setRoles(data.ymRoles)
     }
   }, [data.ymRoles])
-
-  const progressPercentage = calculateProgress(3)
 
   // Convert role types to combobox options
   const roleOptions: ComboboxOption[] = roleTypes.map(rt => ({
@@ -177,54 +179,37 @@ export default function Step3() {
 
   // Show loading state while fetching data
   if (isLoadingData) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-sm text-muted-foreground">Loading roles...</p>
-      </div>
-    )
+    return <OnboardingLoadingState message="Loading roles..." />
   }
 
   // Show error state if data failed to load
   if (loadError) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center max-w-md">
-          <p className="text-sm text-destructive">{loadError}</p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-4"
-            onClick={() => window.location.reload()}
-          >
-            Try Again
-          </Button>
-        </div>
-      </div>
+      <OnboardingErrorState
+        message={loadError}
+        onRetry={() => window.location.reload()}
+      />
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background p-6">
-      {/* Progress Bar */}
-      <div className="w-full">
-        <Progress value={progressPercentage} className="h-2" />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col items-center py-12">
-        {/* Heading */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            What YM roles have you held?
-          </h1>
-          <p className="mt-3 text-muted-foreground">
-            Tell us about your experience in the organization
-          </p>
-        </div>
-
+    <OnboardingLayout
+      step={3}
+      error={saveError}
+      isValid={isValid}
+      isSaving={isSaving}
+      isLoading={isLoading}
+      onBack={handleBack}
+      onNext={handleNext}
+    >
+      <OnboardingContent
+        title="What YM roles have you held?"
+        subtitle="Tell us about your experience in the organization"
+        centered={false}
+        maxWidth="max-w-2xl"
+      >
         {/* Role Entries */}
-        <div className="w-full max-w-2xl space-y-4">
+        <div className="space-y-4">
           {roles.map((role, index) => (
             <Card key={role.id} className="relative">
               {roles.length > 1 && (
@@ -303,31 +288,7 @@ export default function Step3() {
             Add another role
           </Button>
         </div>
-      </div>
-
-      {/* Error Message */}
-      {saveError && (
-        <div className="mb-4 w-full max-w-md mx-auto rounded-md bg-destructive/10 p-4 text-center text-sm text-destructive">
-          {saveError}
-        </div>
-      )}
-
-      {/* Navigation Buttons */}
-      <div className="flex w-full items-center justify-center gap-4 pb-4">
-        <Button variant="outline" onClick={handleBack} disabled={isSaving} className="w-40">
-          Back
-        </Button>
-        <Button onClick={handleNext} disabled={!isValid || isSaving || isLoading} className="w-40">
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            "Next"
-          )}
-        </Button>
-      </div>
-    </div>
+      </OnboardingContent>
+    </OnboardingLayout>
   )
 }

@@ -194,10 +194,10 @@
 
 ## Technical Debt / Cleanup
 
-- [ ] Fix production build error (`/_error` module not found)
-- [ ] Update baseline-browser-mapping package (dev warning)
-- [ ] Consider extracting common onboarding step layout to shared component
-- [ ] Add loading skeletons for Supabase data fetching
+- [x] Fix production build error — switched to local fonts (Geist) to avoid network dependencies at build time
+- [x] Update baseline-browser-mapping package — updated via `bun update`
+- [x] Extract common onboarding step layout to shared component — `OnboardingLayout`, `OnboardingContent`, `OnboardingLoadingState`, `OnboardingErrorState` in `src/app/onboarding/components/`
+- [x] Add loading skeletons for Supabase data fetching — Added `loading.tsx` files for `/home`, `/people`, `/people/[id]`, `/profile` pages with appropriate skeletons
 
 ---
 

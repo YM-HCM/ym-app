@@ -12,11 +12,12 @@
  */
 
 import { useEffect } from 'react'
-import { Geist } from 'next/font/google'
+import localFont from 'next/font/local'
 
-const geistSans = Geist({
+const geistSans = localFont({
+  src: '../fonts/GeistVF.woff2',
   variable: '--font-geist-sans',
-  subsets: ['latin'],
+  weight: '100 900',
 })
 
 interface GlobalErrorProps {

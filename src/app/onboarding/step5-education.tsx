@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, Plus, X } from "lucide-react"
+import { Plus, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Select,
@@ -22,7 +21,10 @@ import {
   ComboboxValue,
 } from "@/components/searchable-combobox"
 import { useOnboarding, EducationEntry, EducationLevel } from "@/contexts/OnboardingContext"
-import { calculateProgress } from "./constants"
+import {
+  OnboardingLayout,
+  OnboardingContent,
+} from "./components"
 
 // Import universities list
 import universitiesData from "@/data/us-universities.json"
@@ -83,8 +85,6 @@ export default function Step5() {
     if (data.educationLevel) setEducationLevel(data.educationLevel)
     if (data.education?.length) setEducation(data.education)
   }, [data.educationLevel, data.education])
-
-  const progressPercentage = calculateProgress(5)
 
   // Check if user needs to fill out college education
   const requiresCollegeEducation = educationLevel === "college"
@@ -162,25 +162,22 @@ export default function Step5() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background p-6">
-      {/* Progress Bar */}
-      <div className="w-full">
-        <Progress value={progressPercentage} className="h-2" />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col items-center py-12">
-        {/* Heading */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            Tell us about your education
-          </h1>
-          <p className="mt-3 text-muted-foreground">
-            Select your current education level
-          </p>
-        </div>
-
-        <div className="w-full max-w-2xl space-y-6">
+    <OnboardingLayout
+      step={5}
+      error={saveError}
+      isValid={isValid}
+      isSaving={isSaving}
+      isLoading={isLoading}
+      onBack={handleBack}
+      onNext={handleNext}
+    >
+      <OnboardingContent
+        title="Tell us about your education"
+        subtitle="Select your current education level"
+        centered={false}
+        maxWidth="max-w-2xl"
+      >
+        <div className="space-y-6">
           {/* Education Level Dropdown */}
           <div className="space-y-1.5">
             <Label>Education Level</Label>
@@ -301,31 +298,7 @@ export default function Step5() {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Error Message */}
-      {saveError && (
-        <div className="mb-4 w-full max-w-md mx-auto rounded-md bg-destructive/10 p-4 text-center text-sm text-destructive">
-          {saveError}
-        </div>
-      )}
-
-      {/* Navigation Buttons */}
-      <div className="flex w-full items-center justify-center gap-4 pb-4">
-        <Button variant="outline" onClick={handleBack} disabled={isSaving} className="w-40">
-          Back
-        </Button>
-        <Button onClick={handleNext} disabled={!isValid || isSaving || isLoading} className="w-40">
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            "Next"
-          )}
-        </Button>
-      </div>
-    </div>
+      </OnboardingContent>
+    </OnboardingLayout>
   )
 }

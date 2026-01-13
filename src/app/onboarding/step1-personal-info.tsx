@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Calendar as CalendarIcon, Globe, Loader2, Mail, Phone } from "lucide-react"
+import { Calendar as CalendarIcon, Globe, Mail, Phone } from "lucide-react"
 import { format } from "date-fns"
 
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -24,7 +23,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { useOnboarding } from "@/contexts/OnboardingContext"
-import { calculateProgress } from "./constants"
+import { OnboardingLayout, OnboardingContent } from "./components"
 
 // Common ethnicities - can be expanded as needed
 const ETHNICITIES = [
@@ -109,8 +108,6 @@ export default function PersonalInfo() {
     email: false,
   })
 
-  const progressPercentage = calculateProgress(1)
-
   // Handle phone input with auto-formatting
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneNumber(e.target.value)
@@ -148,26 +145,19 @@ export default function PersonalInfo() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background p-6">
-      {/* Progress Bar */}
-      <div className="w-full">
-        <Progress value={progressPercentage} className="h-2" />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-12">
-        {/* Heading */}
-        <div className="text-center">
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            Welcome! Let&apos;s get started
-          </h1>
-          <p className="mt-3 text-muted-foreground">
-            First, tell us a bit about yourself
-          </p>
-        </div>
-
-        {/* Form Fields */}
-        <div className="flex w-full max-w-md flex-col gap-5">
+    <OnboardingLayout
+      step={1}
+      error={saveError}
+      isValid={isValid}
+      isSaving={isSaving}
+      isLoading={isLoading}
+      onNext={handleNext}
+      showBack={false}
+    >
+      <OnboardingContent
+        title="Welcome! Let's get started"
+        subtitle="First, tell us a bit about yourself"
+      >
           {/* Phone Number */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="phone">Phone Number</Label>
@@ -277,31 +267,8 @@ export default function PersonalInfo() {
               </PopoverContent>
             </Popover>
           </div>
-        </div>
-      </div>
-
-      {/* Error Message */}
-      {saveError && (
-        <div className="mb-4 w-full max-w-md mx-auto rounded-md bg-destructive/10 p-4 text-center text-sm text-destructive">
-          {saveError}
-        </div>
-      )}
-
-      {/* Navigation Buttons */}
-      <div className="flex w-full items-center justify-center gap-4 pb-4">
-        {/* No previous button for first step */}
-        <Button onClick={handleNext} disabled={!isValid || isSaving || isLoading} className="w-40">
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            "Next"
-          )}
-        </Button>
-      </div>
-    </div>
+      </OnboardingContent>
+    </OnboardingLayout>
   )
 }
 

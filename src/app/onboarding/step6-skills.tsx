@@ -2,14 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useOnboarding } from "@/contexts/OnboardingContext"
-import { calculateProgress } from "./constants"
+import { OnboardingLayout, OnboardingContent } from "./components"
 
 // YM-relevant skills
 const SKILLS = [
@@ -49,8 +46,6 @@ export default function Step6() {
     if (data.skills?.length) setSelectedSkills(data.skills)
   }, [data.skills])
 
-  const progressPercentage = calculateProgress(6)
-
   // Validation: must select between 3 and 5 skills
   const isValid = selectedSkills.length >= 3 && selectedSkills.length <= 5
 
@@ -82,26 +77,22 @@ export default function Step6() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background p-6">
-      {/* Progress Bar */}
-      <div className="w-full">
-        <Progress value={progressPercentage} className="h-2" />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-12">
-        {/* Heading */}
-        <div className="text-center">
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            What are your top skills?
-          </h1>
-          <p className="mt-3 text-muted-foreground">
-            Select 3 to 5 skills that best describe you
-          </p>
-        </div>
-
+    <OnboardingLayout
+      step={6}
+      error={saveError}
+      isValid={isValid}
+      isSaving={isSaving}
+      isLoading={isLoading}
+      onBack={handleBack}
+      onNext={handleNext}
+    >
+      <OnboardingContent
+        title="What are your top skills?"
+        subtitle="Select 3 to 5 skills that best describe you"
+        maxWidth="max-w-2xl"
+      >
         {/* Skills Grid */}
-        <div className="flex flex-wrap justify-center gap-3 max-w-2xl">
+        <div className="flex flex-wrap justify-center gap-3">
           {SKILLS.map((skill) => {
             const isSelected = selectedSkills.includes(skill.id)
             return (
@@ -123,31 +114,7 @@ export default function Step6() {
             )
           })}
         </div>
-      </div>
-
-      {/* Error Message */}
-      {saveError && (
-        <div className="mb-4 w-full max-w-md mx-auto rounded-md bg-destructive/10 p-4 text-center text-sm text-destructive">
-          {saveError}
-        </div>
-      )}
-
-      {/* Navigation Buttons */}
-      <div className="flex w-full items-center justify-center gap-4 pb-4">
-        <Button variant="outline" onClick={handleBack} disabled={isSaving} className="w-40">
-          Back
-        </Button>
-        <Button onClick={handleNext} disabled={!isValid || isSaving || isLoading} className="w-40">
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            "Next"
-          )}
-        </Button>
-      </div>
-    </div>
+      </OnboardingContent>
+    </OnboardingLayout>
   )
 }

@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, Plus, X } from "lucide-react"
+import { Plus, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -17,7 +16,12 @@ import {
 } from "@/components/searchable-combobox"
 import { DateRangeInput } from "@/components/date-range-input"
 import { useOnboarding, YMProjectEntry } from "@/contexts/OnboardingContext"
-import { calculateProgress } from "./constants"
+import {
+  OnboardingLayout,
+  OnboardingContent,
+  OnboardingLoadingState,
+  OnboardingErrorState,
+} from "./components"
 import { fetchCompletedUsers, type UserOption } from "@/lib/supabase/queries/users"
 
 // Common YM project types
@@ -85,8 +89,6 @@ export default function Step4() {
       setProjects(data.ymProjects)
     }
   }, [data.ymProjects])
-
-  const progressPercentage = calculateProgress(4)
 
   // Convert users to combobox options
   const userOptions: ComboboxOption[] = users.map(user => ({
@@ -180,54 +182,37 @@ export default function Step4() {
 
   // Show loading state while fetching data
   if (isLoadingData) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-sm text-muted-foreground">Loading users...</p>
-      </div>
-    )
+    return <OnboardingLoadingState message="Loading users..." />
   }
 
   // Show error state if data failed to load
   if (loadError) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center max-w-md">
-          <p className="text-sm text-destructive">{loadError}</p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-4"
-            onClick={() => window.location.reload()}
-          >
-            Try Again
-          </Button>
-        </div>
-      </div>
+      <OnboardingErrorState
+        message={loadError}
+        onRetry={() => window.location.reload()}
+      />
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background p-6">
-      {/* Progress Bar */}
-      <div className="w-full">
-        <Progress value={progressPercentage} className="h-2" />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col items-center py-12">
-        {/* Heading */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            What YM projects have you worked on?
-          </h1>
-          <p className="mt-3 text-muted-foreground">
-            Tell us about your project contributions
-          </p>
-        </div>
-
+    <OnboardingLayout
+      step={4}
+      error={saveError}
+      isValid={isValid}
+      isSaving={isSaving}
+      isLoading={isLoading}
+      onBack={handleBack}
+      onNext={handleNext}
+    >
+      <OnboardingContent
+        title="What YM projects have you worked on?"
+        subtitle="Tell us about your project contributions"
+        centered={false}
+        maxWidth="max-w-2xl"
+      >
         {/* Project Entries */}
-        <div className="w-full max-w-2xl space-y-4">
+        <div className="space-y-4">
           {projects.map((project, index) => (
             <Card key={project.id} className="relative">
               {projects.length > 1 && (
@@ -318,31 +303,7 @@ export default function Step4() {
             Add another project
           </Button>
         </div>
-      </div>
-
-      {/* Error Message */}
-      {saveError && (
-        <div className="mb-4 w-full max-w-md mx-auto rounded-md bg-destructive/10 p-4 text-center text-sm text-destructive">
-          {saveError}
-        </div>
-      )}
-
-      {/* Navigation Buttons */}
-      <div className="flex w-full items-center justify-center gap-4 pb-4">
-        <Button variant="outline" onClick={handleBack} disabled={isSaving} className="w-40">
-          Back
-        </Button>
-        <Button onClick={handleNext} disabled={!isValid || isSaving || isLoading} className="w-40">
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            "Next"
-          )}
-        </Button>
-      </div>
-    </div>
+      </OnboardingContent>
+    </OnboardingLayout>
   )
 }
