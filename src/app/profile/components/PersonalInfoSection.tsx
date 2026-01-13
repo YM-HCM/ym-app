@@ -4,6 +4,7 @@ import { Phone, Mail, Globe, Calendar } from 'lucide-react'
 import { InlineEditField } from './InlineEditField'
 import { useProfileMode } from '@/contexts/ProfileModeContext'
 import { format } from 'date-fns'
+import { formatPhoneNumber, isValidPhone, isValidEmail } from '@/lib/validation'
 
 // Common ethnicities - matching step1-personal-info.tsx
 const ETHNICITIES = [
@@ -13,29 +14,6 @@ const ETHNICITIES = [
   'Palestinian', 'Saudi', 'Somali', 'Sudanese', 'Syrian', 'Tunisian',
   'Turkish', 'Yemeni', 'Other',
 ].map(eth => ({ value: eth.toLowerCase(), label: eth }))
-
-// Format phone number as user types: (555) 123-4567
-function formatPhoneNumber(value: string): string {
-  const digits = value.replace(/\D/g, '')
-  const limited = digits.slice(0, 10)
-
-  if (limited.length === 0) return ''
-  if (limited.length <= 3) return `(${limited}`
-  if (limited.length <= 6) return `(${limited.slice(0, 3)}) ${limited.slice(3)}`
-  return `(${limited.slice(0, 3)}) ${limited.slice(3, 6)}-${limited.slice(6)}`
-}
-
-// Check if phone has 10 digits
-function isValidPhone(phone: string): boolean {
-  const digits = phone.replace(/\D/g, '')
-  return digits.length === 10
-}
-
-// Basic email validation: has @ and domain with TLD
-function isValidEmail(email: string): boolean {
-  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return pattern.test(email)
-}
 
 // Read-only field display component
 function ReadOnlyField({
