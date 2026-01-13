@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Briefcase } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -11,6 +12,7 @@ import {
 } from '@/components/searchable-combobox'
 import { DateRangeInput } from '@/components/date-range-input'
 import { ExpandableCard, ExpandableCardList } from './ExpandableCard'
+import { useProfileMode } from '@/contexts/ProfileModeContext'
 import type { YMProjectEntry } from '@/contexts/OnboardingContext'
 
 // Project types (can be expanded)
@@ -87,6 +89,7 @@ export function YMProjectsSection({
   onAddProject,
   onRemoveProject,
 }: YMProjectsSectionProps) {
+  const { isEditable } = useProfileMode()
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const getProjectComboboxValue = (project: YMProjectEntry): ComboboxValue | undefined => {
@@ -131,12 +134,31 @@ export function YMProjectsSection({
     }
   }
 
+  const getAmirDisplay = (project: YMProjectEntry): string => {
+    if (project.amirUserId) {
+      const option = PLACEHOLDER_AMIRS.find(a => a.value === project.amirUserId)
+      return option?.label || project.amirUserId
+    }
+    if (project.amirCustomName) {
+      return project.amirCustomName
+    }
+    return '—'
+  }
+
+  const emptyState = (
+    <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
+      <Briefcase className="h-10 w-10 text-muted-foreground/50 mb-3" />
+      <p className="text-sm text-muted-foreground">No projects added yet</p>
+    </div>
+  )
+
   return (
     <ExpandableCardList
       title="YM Projects"
-      description="Projects and initiatives you've contributed to"
-      addLabel="Add another project"
-      onAdd={onAddProject}
+      description={isEditable ? "Projects and initiatives you've contributed to" : "Projects and initiatives contributed to"}
+      addLabel={isEditable ? "Add another project" : undefined}
+      onAdd={isEditable ? onAddProject : undefined}
+      emptyState={!isEditable ? emptyState : undefined}
     >
       {projects.map((project, index) => (
         <ExpandableCard
@@ -147,9 +169,10 @@ export function YMProjectsSection({
           badge={project.isCurrent ? 'Active' : undefined}
           isExpanded={expandedId === project.id}
           onToggle={() => setExpandedId(expandedId === project.id ? null : project.id)}
-          onDelete={() => onRemoveProject(index)}
+          onDelete={isEditable ? () => onRemoveProject(index) : undefined}
         >
-          <div className="space-y-4">
+          {isEditable ? (
+            <div className="space-y-4">
             <div className="space-y-1.5">
               <Label>Project Type</Label>
               <SearchableCombobox
@@ -206,6 +229,24 @@ export function YMProjectsSection({
               />
             </div>
           </div>
+          ) : (
+            <div className="space-y-3 text-sm">
+              <div>
+                <span className="font-medium text-muted-foreground">Role:</span>
+                <span className="ml-2 text-foreground">{project.role || '—'}</span>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Project Lead:</span>
+                <span className="ml-2 text-foreground">{getAmirDisplay(project)}</span>
+              </div>
+              {project.description && (
+                <div>
+                  <span className="font-medium text-muted-foreground">Description:</span>
+                  <p className="mt-1 text-foreground whitespace-pre-wrap">{project.description}</p>
+                </div>
+              )}
+            </div>
+          )}
         </ExpandableCard>
       ))}
     </ExpandableCardList>

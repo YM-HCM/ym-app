@@ -108,10 +108,11 @@ export function ExpandableCard({
 interface ExpandableCardListProps {
   title: string
   description?: string
-  addLabel: string
-  onAdd: () => void
+  addLabel?: string
+  onAdd?: () => void
   children: ReactNode
   className?: string
+  emptyState?: ReactNode
 }
 
 export function ExpandableCardList({
@@ -121,7 +122,10 @@ export function ExpandableCardList({
   onAdd,
   children,
   className,
+  emptyState,
 }: ExpandableCardListProps) {
+  const hasChildren = Array.isArray(children) ? children.length > 0 : !!children
+
   return (
     <section className={cn('space-y-5', className)}>
       {title && (
@@ -133,19 +137,25 @@ export function ExpandableCardList({
         </div>
       )}
 
-      <div className="space-y-3">
-        {children}
+      {!hasChildren && emptyState ? (
+        emptyState
+      ) : (
+        <div className="space-y-3">
+          {children}
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onAdd}
-          className="w-full border-dashed hover:border-solid hover:border-primary hover:bg-primary/5"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          {addLabel}
-        </Button>
-      </div>
+          {onAdd && addLabel && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onAdd}
+              className="w-full border-dashed hover:border-solid hover:border-primary hover:bg-primary/5"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {addLabel}
+            </Button>
+          )}
+        </div>
+      )}
     </section>
   )
 }

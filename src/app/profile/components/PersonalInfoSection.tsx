@@ -2,6 +2,8 @@
 
 import { Phone, Mail, Globe, Calendar } from 'lucide-react'
 import { InlineEditField } from './InlineEditField'
+import { useProfileMode } from '@/contexts/ProfileModeContext'
+import { format } from 'date-fns'
 
 // Common ethnicities - matching step1-personal-info.tsx
 const ETHNICITIES = [
@@ -35,6 +37,29 @@ function isValidEmail(email: string): boolean {
   return pattern.test(email)
 }
 
+// Read-only field display component
+function ReadOnlyField({
+  label,
+  value,
+  icon,
+}: {
+  label: string
+  value: string
+  icon?: React.ReactNode
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+        {icon && <span className="text-muted-foreground">{icon}</span>}
+        <span>{label}</span>
+      </div>
+      <div className="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-foreground">
+        {value || '—'}
+      </div>
+    </div>
+  )
+}
+
 interface PersonalInfoSectionProps {
   phoneNumber?: string
   personalEmail?: string
@@ -58,68 +83,108 @@ export function PersonalInfoSection({
   onEthnicityChange,
   onDateOfBirthChange,
 }: PersonalInfoSectionProps) {
+  const { isEditable } = useProfileMode()
+
   return (
     <section className="space-y-5">
       <div>
         <h2 className="text-xl font-semibold tracking-tight text-foreground">Personal Information</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Your contact details and personal info
+          {isEditable ? 'Your contact details and personal info' : 'Contact details and personal info'}
         </p>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <InlineEditField
-          type="tel"
-          label="Phone Number"
-          value={phoneNumber}
-          onChange={onPhoneChange}
-          icon={<Phone className="h-4 w-4" />}
-          placeholder="(555) 123-4567"
-          formatter={formatPhoneNumber}
-          validator={isValidPhone}
-          errorMessage="Please enter a valid 10-digit phone number"
-        />
+        {isEditable ? (
+          <>
+            <InlineEditField
+              type="tel"
+              label="Phone Number"
+              value={phoneNumber}
+              onChange={onPhoneChange}
+              icon={<Phone className="h-4 w-4" />}
+              placeholder="(555) 123-4567"
+              formatter={formatPhoneNumber}
+              validator={isValidPhone}
+              errorMessage="Please enter a valid 10-digit phone number"
+            />
 
-        <InlineEditField
-          type="email"
-          label="Personal Email"
-          value={personalEmail}
-          onChange={onPersonalEmailChange}
-          icon={<Mail className="h-4 w-4" />}
-          placeholder="you@example.com"
-          validator={isValidEmail}
-          errorMessage="Please enter a valid email address"
-        />
+            <InlineEditField
+              type="email"
+              label="Personal Email"
+              value={personalEmail}
+              onChange={onPersonalEmailChange}
+              icon={<Mail className="h-4 w-4" />}
+              placeholder="you@example.com"
+              validator={isValidEmail}
+              errorMessage="Please enter a valid email address"
+            />
 
-        {googleEmail && (
-          <InlineEditField
-            type="email"
-            label="YM Email"
-            value={googleEmail}
-            onChange={() => {}}
-            icon={<Mail className="h-4 w-4" />}
-            disabled
-          />
+            {googleEmail && (
+              <InlineEditField
+                type="email"
+                label="YM Email"
+                value={googleEmail}
+                onChange={() => {}}
+                icon={<Mail className="h-4 w-4" />}
+                disabled
+              />
+            )}
+
+            <InlineEditField
+              type="select"
+              label="Ethnicity"
+              value={ethnicity}
+              onChange={onEthnicityChange}
+              icon={<Globe className="h-4 w-4" />}
+              options={ETHNICITIES}
+              placeholder="Select ethnicity"
+            />
+
+            <InlineEditField
+              type="date"
+              label="Date of Birth"
+              value={dateOfBirth}
+              onChange={onDateOfBirthChange}
+              icon={<Calendar className="h-4 w-4" />}
+              placeholder="Select date"
+            />
+          </>
+        ) : (
+          <>
+            <ReadOnlyField
+              label="Phone Number"
+              value={phoneNumber}
+              icon={<Phone className="h-4 w-4" />}
+            />
+
+            <ReadOnlyField
+              label="Personal Email"
+              value={personalEmail}
+              icon={<Mail className="h-4 w-4" />}
+            />
+
+            {googleEmail && (
+              <ReadOnlyField
+                label="YM Email"
+                value={googleEmail}
+                icon={<Mail className="h-4 w-4" />}
+              />
+            )}
+
+            <ReadOnlyField
+              label="Ethnicity"
+              value={ETHNICITIES.find(e => e.value === ethnicity)?.label || ethnicity}
+              icon={<Globe className="h-4 w-4" />}
+            />
+
+            <ReadOnlyField
+              label="Date of Birth"
+              value={dateOfBirth ? format(dateOfBirth, 'MMMM d, yyyy') : ''}
+              icon={<Calendar className="h-4 w-4" />}
+            />
+          </>
         )}
-
-        <InlineEditField
-          type="select"
-          label="Ethnicity"
-          value={ethnicity}
-          onChange={onEthnicityChange}
-          icon={<Globe className="h-4 w-4" />}
-          options={ETHNICITIES}
-          placeholder="Select ethnicity"
-        />
-
-        <InlineEditField
-          type="date"
-          label="Date of Birth"
-          value={dateOfBirth}
-          onChange={onDateOfBirthChange}
-          icon={<Calendar className="h-4 w-4" />}
-          placeholder="Select date"
-        />
       </div>
     </section>
   )
