@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { UserX } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -10,6 +11,7 @@ import {
 } from '@/components/searchable-combobox'
 import { DateRangeInput } from '@/components/date-range-input'
 import { ExpandableCard, ExpandableCardList } from './ExpandableCard'
+import { useProfileMode } from '@/contexts/ProfileModeContext'
 import type { YMRoleEntry } from '@/contexts/OnboardingContext'
 
 // YM Role types from step3-ym-roles.tsx
@@ -90,6 +92,7 @@ export function YMRolesSection({
   onAddRole,
   onRemoveRole,
 }: YMRolesSectionProps) {
+  const { isEditable } = useProfileMode()
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const getRoleComboboxValue = (role: YMRoleEntry): ComboboxValue | undefined => {
@@ -134,12 +137,31 @@ export function YMRolesSection({
     }
   }
 
+  const getAmirDisplay = (role: YMRoleEntry): string => {
+    if (role.amirUserId) {
+      const option = PLACEHOLDER_AMIRS.find(a => a.value === role.amirUserId)
+      return option?.label || role.amirUserId
+    }
+    if (role.amirCustomName) {
+      return role.amirCustomName
+    }
+    return '—'
+  }
+
+  const emptyState = (
+    <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
+      <UserX className="h-10 w-10 text-muted-foreground/50 mb-3" />
+      <p className="text-sm text-muted-foreground">No roles added yet</p>
+    </div>
+  )
+
   return (
     <ExpandableCardList
       title="YM Roles"
-      description="Your positions and responsibilities in the organization"
-      addLabel="Add another role"
-      onAdd={onAddRole}
+      description={isEditable ? "Your positions and responsibilities in the organization" : "Positions and responsibilities in the organization"}
+      addLabel={isEditable ? "Add another role" : undefined}
+      onAdd={isEditable ? onAddRole : undefined}
+      emptyState={!isEditable ? emptyState : undefined}
     >
       {roles.map((role, index) => (
         <ExpandableCard
@@ -150,56 +172,71 @@ export function YMRolesSection({
           badge={role.isCurrent ? 'Current' : undefined}
           isExpanded={expandedId === role.id}
           onToggle={() => setExpandedId(expandedId === role.id ? null : role.id)}
-          onDelete={roles.length > 1 ? () => onRemoveRole(index) : undefined}
+          onDelete={isEditable && roles.length > 1 ? () => onRemoveRole(index) : undefined}
         >
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>Role</Label>
-              <SearchableCombobox
-                options={YM_ROLES}
-                value={getRoleComboboxValue(role)}
-                onChange={(value) => handleRoleTypeChange(index, value)}
-                placeholder="Select or add a role"
-                searchPlaceholder="Search roles..."
-                allowCustom
-              />
-            </div>
+          {isEditable ? (
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label>Role</Label>
+                <SearchableCombobox
+                  options={YM_ROLES}
+                  value={getRoleComboboxValue(role)}
+                  onChange={(value) => handleRoleTypeChange(index, value)}
+                  placeholder="Select or add a role"
+                  searchPlaceholder="Search roles..."
+                  allowCustom
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label>Amir / Manager</Label>
-              <SearchableCombobox
-                options={PLACEHOLDER_AMIRS}
-                value={getAmirComboboxValue(role)}
-                onChange={(value) => handleAmirChange(index, value)}
-                placeholder="Select or add a person"
-                searchPlaceholder="Search people..."
-                allowCustom
-              />
-            </div>
+              <div className="space-y-1.5">
+                <Label>Amir / Manager</Label>
+                <SearchableCombobox
+                  options={PLACEHOLDER_AMIRS}
+                  value={getAmirComboboxValue(role)}
+                  onChange={(value) => handleAmirChange(index, value)}
+                  placeholder="Select or add a person"
+                  searchPlaceholder="Search people..."
+                  allowCustom
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label>Date Range</Label>
-              <DateRangeInput
-                startMonth={role.startMonth}
-                startYear={role.startYear}
-                endMonth={role.endMonth}
-                endYear={role.endYear}
-                isCurrent={role.isCurrent}
-                onChange={(values) => onUpdateRole(index, values)}
-                currentLabel="I currently hold this role"
-              />
-            </div>
+              <div className="space-y-1.5">
+                <Label>Date Range</Label>
+                <DateRangeInput
+                  startMonth={role.startMonth}
+                  startYear={role.startYear}
+                  endMonth={role.endMonth}
+                  endYear={role.endYear}
+                  isCurrent={role.isCurrent}
+                  onChange={(values) => onUpdateRole(index, values)}
+                  currentLabel="I currently hold this role"
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label>What did you do? (optional)</Label>
-              <Textarea
-                value={role.description ?? ''}
-                onChange={(e) => onUpdateRole(index, { description: e.target.value })}
-                placeholder="Describe your responsibilities and achievements..."
-                rows={3}
-              />
+              <div className="space-y-1.5">
+                <Label>What did you do? (optional)</Label>
+                <Textarea
+                  value={role.description ?? ''}
+                  onChange={(e) => onUpdateRole(index, { description: e.target.value })}
+                  placeholder="Describe your responsibilities and achievements..."
+                  rows={3}
+                />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-3 text-sm">
+              <div>
+                <span className="font-medium text-muted-foreground">Amir / Manager:</span>
+                <span className="ml-2 text-foreground">{getAmirDisplay(role)}</span>
+              </div>
+              {role.description && (
+                <div>
+                  <span className="font-medium text-muted-foreground">Description:</span>
+                  <p className="mt-1 text-foreground whitespace-pre-wrap">{role.description}</p>
+                </div>
+              )}
+            </div>
+          )}
         </ExpandableCard>
       ))}
     </ExpandableCardList>

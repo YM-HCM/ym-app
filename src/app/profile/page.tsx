@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { User, ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ProfileModeProvider } from '@/contexts/ProfileModeContext'
 import { useProfileForm, type ProfileFormState } from './hooks/useProfileForm'
 import { useProfileData } from './hooks/useProfileData'
 import { PersonalInfoSection } from './components/PersonalInfoSection'
@@ -120,7 +121,8 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <ProfileModeProvider isEditable={true}>
+      <div className="flex min-h-screen flex-col bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center gap-4 px-6">
@@ -262,6 +264,7 @@ export default function ProfilePage() {
         changeCount={changeCount}
         error={saveAndLeaveError}
       />
-    </div>
+      </div>
+    </ProfileModeProvider>
   )
 }
