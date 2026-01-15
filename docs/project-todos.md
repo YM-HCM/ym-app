@@ -257,6 +257,38 @@
 
 ---
 
+## Exploratory / Spikes (Research & Ideation)
+
+> **Note:** These are exploratory tasks ("spikes") to investigate feasibility and brainstorm ideas. No immediate implementation required.
+
+### Career & Networking Features
+- [ ] **Spike: Employment data integration**
+  - Explore LinkedIn scraping or other methods to get info on where GSuite users work
+  - Use case: Enable YM members to give each other referrals at their companies
+  - Consider: LinkedIn API limitations, privacy concerns, alternative data sources (manual input, company email domains)
+  - Research: Legal/ethical considerations for scraping, GDPR/privacy compliance
+
+### Community Engagement Features
+- [ ] **Spike: Collective social media feed**
+  - Explore creating a unified Instagram feed from all NeighborNets
+  - Use case: Showcase community activity, events, and culture in one place
+  - Consider: Instagram API restrictions, hashtag aggregation, embedding options
+  - Research: Authentication requirements, rate limits, content moderation needs
+
+### User Engagement Strategy
+- [ ] **Spike: User engagement & retention**
+  - Brainstorm ways to get users to actively engage with the app beyond admin tasks
+  - Current state: App is primarily for administrators (onboarding, directory, profiles)
+  - Ideas to explore:
+    - Social features: commenting, reactions, posts/updates
+    - Gamification: achievements, leaderboards, participation streaks
+    - Community features: event RSVPs, resource sharing, Q&A forums
+    - Personal value: prayer times, Islamic resources, local masjid info
+    - Notifications: announcements, reminders, milestone celebrations
+  - Research: What keeps users coming back? Study successful community platforms
+
+---
+
 ### Design Notes
 - **Current issue:** Every step looks identical (monotonous layout)
 - **Color:** Currently pure grayscale—consider adding one accent color
