@@ -22,7 +22,8 @@ export function AppShell({ children }: AppShellProps) {
       <AppSidebar />
       <SidebarInset>
         {/* Mobile header with hamburger - hidden on desktop */}
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 md:hidden">
+        {/* pt-safe adds padding for iOS notch/Dynamic Island in PWA standalone mode */}
+        <header className="flex min-h-14 shrink-0 items-end pb-3 gap-2 border-b px-4 pt-safe md:hidden">
           <SidebarTrigger className="-ml-1" />
         </header>
         {/* Main content */}
