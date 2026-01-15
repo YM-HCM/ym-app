@@ -3,7 +3,9 @@
   "short_name": "YM App",
   "description": "Young Muslims Official App",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#3b5ba5",
   "icons": [
