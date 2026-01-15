@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
-import { DollarSign } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { AppShell } from '@/components/layout'
+import { JotformEmbed } from '@/components/finance/JotformEmbed'
 
 export default async function FinancePage() {
   const supabase = await createClient()
@@ -13,15 +13,19 @@ export default async function FinancePage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3.5rem)] md:min-h-screen px-4">
-        <div className="text-center space-y-4">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <DollarSign className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Finance</h1>
-          <p className="text-muted-foreground max-w-md">
-            Reimbursements and financial tools. Coming soon.
+      <div className="container mx-auto py-8 px-4 max-w-4xl">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold tracking-tight">Reimbursement Form</h1>
+          <p className="text-muted-foreground mt-2">
+            Submit your reimbursement request below
           </p>
+        </div>
+
+        <div className="bg-card border rounded-lg p-6 shadow-sm">
+          <JotformEmbed
+            formId="233184710128148"
+            title="YM Reimbursement Form"
+          />
         </div>
       </div>
     </AppShell>
