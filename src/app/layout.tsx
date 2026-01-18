@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { AuthProviderWrapper } from "@/components/providers/AuthProviderWrapper";
 import { ServiceWorkerRegistration } from "@/components/providers/ServiceWorkerRegistration";
+import { IOSInstallPrompt } from "@/components/pwa/IOSInstallPrompt";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -55,6 +56,7 @@ export default function RootLayout({
       >
         <AuthProviderWrapper>
           <ServiceWorkerRegistration />
+          <IOSInstallPrompt />
           {children}
         </AuthProviderWrapper>
       </body>

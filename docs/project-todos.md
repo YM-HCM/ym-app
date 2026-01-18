@@ -106,10 +106,10 @@
 - [x] Hide filters on mobile — Search-only on mobile
 - [ ] **Pagination** — See design doc Phase 4: `docs/plans/2026-01-09-people-directory-design.md#L355-L360`
 
-#### Phase 5: Profile View
-- [ ] **`/people/[id]` route** — Read-only profile view when clicking a person
-- [ ] **Reuse profile components** with `isEditable={false}` prop
-- [ ] **Back to directory navigation**
+#### Phase 5: Profile View ✅ COMPLETE
+- [x] **`/people/[id]` route** — Read-only profile view when clicking a person
+- [x] **Reuse profile components** with `isEditable={false}` prop — Uses `ProfileModeProvider`
+- [x] **Back to directory navigation** — Back button with smart URL preservation
 - See design doc Phase 5: `docs/plans/2026-01-09-people-directory-design.md#L362-L365`
 
 #### Cleanup Before Production ✅ COMPLETE
@@ -144,14 +144,16 @@
 - [ ] Mobile responsiveness
 - [ ] Accessibility audit (keyboard navigation, screen readers)
 
-### Progressive Web App (PWA)
-- [ ] Explore iOS "Add to Home Screen" functionality for webapp
-  - Research PWA requirements (manifest.json, service worker, icons)
-  - Add Web App Manifest with proper iOS meta tags
-  - Create app icons in required sizes (180x180 for iOS)
-  - Add `apple-touch-icon` and `apple-mobile-web-app-*` meta tags
-  - Test standalone mode behavior on iOS Safari
-  - Consider splash screen configuration
+### Progressive Web App (PWA) ✅ COMPLETE
+- [x] Explore iOS "Add to Home Screen" functionality for webapp
+  - [x] Research PWA requirements (manifest.json, service worker, icons)
+  - [x] Add Web App Manifest with proper iOS meta tags — `public/manifest.json`
+  - [x] Create app icons in required sizes (180x180 for iOS) — `apple-touch-icon.png`, `icon-192x192.png`, `icon-512x512.png`
+  - [x] Add `apple-touch-icon` and `apple-mobile-web-app-*` meta tags — via Next.js metadata in `layout.tsx`
+  - [ ] Test standalone mode behavior on iOS Safari
+  - [ ] Consider splash screen configuration
+  - [x] **Creative iOS Safari install banner** — `IOSInstallPrompt` component shows on iOS Safari only
+    - ⚠️ **TODO: Revisit** — Add animations, better timing, analytics, A/B testing (see component TODOs)
 
 ---
 
