@@ -1,23 +1,78 @@
 {
   "name": "Young Muslims App",
   "short_name": "YM App",
-  "description": "Young Muslims Official App",
+  "description": "Young Muslims Official App - Connect with your community, manage your profile, and stay engaged",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#3b5ba5",
+  "categories": ["social", "lifestyle", "education"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "My Profile",
+      "short_name": "Profile",
+      "description": "View and edit your profile",
+      "url": "/profile",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "People Directory",
+      "short_name": "People",
+      "description": "Browse the community directory",
+      "url": "/people",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Documentation",
+      "short_name": "Docs",
+      "description": "View app documentation",
+      "url": "/docs",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Home Dashboard"
+    },
+    {
+      "src": "/screenshots/home-narrow.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home Dashboard Mobile"
+    }
+  ],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
 }
