@@ -10,6 +10,7 @@ import {
   PeopleTable,
   ViewToggle,
   CopyEmailsButton,
+  LoadMoreButton,
 } from './components'
 import { usePeopleFilters } from './hooks/usePeopleFilters'
 import type { PersonListItem, FilterCategory, ViewMode } from './types'
@@ -30,6 +31,9 @@ export function PeoplePageClient({ initialPeople, filterCategories }: PeoplePage
     clearCategory,
     clearAllFilters,
     filteredPeople,
+    visiblePeople,
+    hasMore,
+    loadMore,
   } = usePeopleFilters(initialPeople)
 
   return (
@@ -75,7 +79,10 @@ export function PeoplePageClient({ initialPeople, filterCategories }: PeoplePage
         <main className="flex-1 px-4 md:px-6 py-6">
           {/* Cards view (default, always on mobile) */}
           {(viewMode === 'cards' || isMobile) && (
-            <PersonCardGrid people={filteredPeople} />
+            <>
+              <PersonCardGrid people={visiblePeople} />
+              <LoadMoreButton hasMore={hasMore} onLoadMore={loadMore} />
+            </>
           )}
 
           {/* Table view (desktop only) */}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import type { PersonListItem, PeopleFilters } from '../types'
 
 function getInitialFilters(): PeopleFilters {
@@ -17,6 +17,8 @@ function getInitialFilters(): PeopleFilters {
   }
 }
 
+const PAGE_SIZE = 20
+
 interface UsePeopleFiltersReturn {
   filters: PeopleFilters
   setSearch: (search: string) => void
@@ -27,6 +29,9 @@ interface UsePeopleFiltersReturn {
   clearCategory: (category: keyof Omit<PeopleFilters, 'search' | 'yearsInYM'>) => void
   clearAllFilters: () => void
   filteredPeople: PersonListItem[]
+  visiblePeople: PersonListItem[]
+  hasMore: boolean
+  loadMore: () => void
 }
 
 export function usePeopleFilters(people: PersonListItem[]): UsePeopleFiltersReturn {
@@ -126,6 +131,25 @@ export function usePeopleFilters(people: PersonListItem[]): UsePeopleFiltersRetu
     })
   }, [people, filters])
 
+  // Pagination state for Load More
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  // Reset visible count when filtered results change
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [filteredPeople.length])
+
+  const visiblePeople = useMemo(
+    () => filteredPeople.slice(0, visibleCount),
+    [filteredPeople, visibleCount]
+  )
+
+  const hasMore = visibleCount < filteredPeople.length
+
+  const loadMore = useCallback(() => {
+    setVisibleCount((c) => c + PAGE_SIZE)
+  }, [])
+
   return {
     filters,
     setSearch,
@@ -133,5 +157,8 @@ export function usePeopleFilters(people: PersonListItem[]): UsePeopleFiltersRetu
     clearCategory,
     clearAllFilters,
     filteredPeople,
+    visiblePeople,
+    hasMore,
+    loadMore,
   }
 }
