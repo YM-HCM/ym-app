@@ -100,11 +100,11 @@
 - [x] Switchable card/table views — ViewToggle with shadcn Tabs
 - [x] Copy emails to clipboard action — CopyEmailsButton with toast
 
-#### Phase 4: Polish (Partial)
+#### Phase 4: Polish ✅ COMPLETE
 - [x] Empty states ("No people found")
 - [x] Loading skeletons — PersonCardSkeleton + PersonCardGridSkeleton
 - [x] Hide filters on mobile — Search-only on mobile
-- [ ] **Pagination** — See design doc Phase 4: `docs/plans/2026-01-09-people-directory-design.md#L355-L360`
+- [x] **Pagination** — Load More button for card view (20 items at a time)
 
 #### Phase 5: Profile View ✅ COMPLETE
 - [x] **`/people/[id]` route** — Read-only profile view when clicking a person
