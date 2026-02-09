@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export function PersonCardSkeleton() {
   return (
     <Card className="h-full">
-      <div className="p-5">
+      <div className="p-6">
         {/* Header: Avatar + Name + Location */}
         <div className="flex items-start gap-4 mb-4">
           {/* Avatar skeleton */}

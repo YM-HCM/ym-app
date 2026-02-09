@@ -49,14 +49,14 @@ export function IOSInstallPrompt() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 pb-safe">
-      <div className="mx-auto max-w-md rounded-xl bg-white shadow-lg border border-gray-200 p-4">
+      <div className="mx-auto max-w-md rounded-xl bg-card shadow-lg border p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
-            <p className="font-semibold text-gray-900">Install YM App</p>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="font-semibold text-card-foreground">Install YM App</p>
+            <p className="text-sm text-muted-foreground mt-1">
               Add to your home screen for the best experience
             </p>
-            <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
+            <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
               <span>Tap</span>
               <Share className="h-4 w-4" />
               <span>then</span>

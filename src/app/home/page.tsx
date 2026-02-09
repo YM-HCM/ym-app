@@ -50,7 +50,7 @@ export default async function HomePage() {
         <div className="w-full max-w-2xl space-y-8">
           {/* Personal Context Card */}
           <div
-            className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+            className="animate-in fade-in slide-in-from-bottom-4 duration-200"
             style={{ animationDelay: '0ms' }}
           >
             <PersonalContextCard
@@ -64,7 +64,7 @@ export default async function HomePage() {
 
           {/* Quick Action Cards */}
           <div
-            className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-200"
             style={{ animationDelay: '150ms' }}
           >
             {QUICK_ACTIONS.map((action) => (

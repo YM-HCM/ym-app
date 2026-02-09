@@ -17,7 +17,7 @@ export function DocsContent() {
       <div className="mx-auto max-w-3xl space-y-12">
         {/* Page Header */}
         <div
-          className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500"
+          className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-200"
           style={{ animationDelay: '0ms' }}
         >
           <div className="flex items-center gap-3">
@@ -35,7 +35,7 @@ export function DocsContent() {
 
         {/* Resources Section */}
         <section
-          className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
+          className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200"
           style={{ animationDelay: '100ms' }}
         >
           <div>
@@ -53,7 +53,7 @@ export function DocsContent() {
 
         {/* SOPs Section */}
         <section
-          className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
+          className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200"
           style={{ animationDelay: '200ms' }}
         >
           <div>

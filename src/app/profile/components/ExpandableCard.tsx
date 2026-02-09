@@ -32,7 +32,7 @@ export function ExpandableCard({
   return (
     <Card
       className={cn(
-        'overflow-hidden transition-all duration-300 ease-out',
+        'overflow-hidden transition-all duration-200 ease-out',
         isExpanded ? 'ring-2 ring-primary/20 shadow-lg' : 'hover:shadow-md',
         className
       )}
@@ -62,7 +62,7 @@ export function ExpandableCard({
 
         <ChevronDown
           className={cn(
-            'h-5 w-5 text-muted-foreground transition-transform duration-300 shrink-0',
+            'h-5 w-5 text-muted-foreground transition-transform duration-200 shrink-0',
             isExpanded && 'rotate-180'
           )}
         />
@@ -71,7 +71,7 @@ export function ExpandableCard({
       {/* Expandable content */}
       <div
         className={cn(
-          'grid transition-all duration-300 ease-out',
+          'grid transition-all duration-200 ease-out',
           isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
         )}
       >

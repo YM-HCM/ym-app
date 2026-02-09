@@ -85,7 +85,7 @@ export function FloatingSaveBar({
     <div
       className={cn(
         'fixed bottom-6 left-1/2 -translate-x-1/2 z-50',
-        'animate-in fade-in slide-in-from-bottom-4 duration-300',
+        'animate-in fade-in slide-in-from-bottom-4 duration-200',
         // Ensure it doesn't overflow on narrow screens
         'max-w-[calc(100vw-2rem)]',
         className

@@ -46,9 +46,9 @@ export function PersonCard({ person }: PersonCardProps) {
       className="group relative h-full cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/20 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
       {/* Subtle gradient overlay on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
-      <div className="relative p-5">
+      <div className="relative p-6">
         {/* Header: Avatar + Name + Location */}
         <div className="flex items-start gap-4 mb-4">
           {/* Avatar */}

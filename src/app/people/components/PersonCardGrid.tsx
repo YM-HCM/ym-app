@@ -28,7 +28,7 @@ export function PersonCardGrid({ people }: PersonCardGridProps) {
       {people.map((person, index) => (
         <div
           key={person.id}
-          className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300"
+          className="h-full animate-in fade-in slide-in-from-bottom-2 duration-200"
           style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
         >
           <PersonCard person={person} />

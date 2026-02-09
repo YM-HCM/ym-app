@@ -180,7 +180,7 @@ export default function ProfilePage() {
           {!isLoading && !error && isInitialized && (
             <>
               <div
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className="animate-in fade-in slide-in-from-bottom-4 duration-200"
                 style={{ animationDelay: '0ms' }}
               >
                 <PersonalInfoSection
@@ -197,7 +197,7 @@ export default function ProfilePage() {
               </div>
 
               <div
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className="animate-in fade-in slide-in-from-bottom-4 duration-200"
                 style={{ animationDelay: '100ms' }}
               >
                 <YMRolesSection
@@ -209,7 +209,7 @@ export default function ProfilePage() {
               </div>
 
               <div
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className="animate-in fade-in slide-in-from-bottom-4 duration-200"
                 style={{ animationDelay: '200ms' }}
               >
                 <YMProjectsSection
@@ -221,7 +221,7 @@ export default function ProfilePage() {
               </div>
 
               <div
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className="animate-in fade-in slide-in-from-bottom-4 duration-200"
                 style={{ animationDelay: '300ms' }}
               >
                 <EducationSection
@@ -235,7 +235,7 @@ export default function ProfilePage() {
               </div>
 
               <div
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className="animate-in fade-in slide-in-from-bottom-4 duration-200"
                 style={{ animationDelay: '400ms' }}
               >
                 <SkillsChipSelector
