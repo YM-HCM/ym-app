@@ -4,6 +4,7 @@ import type { KeyboardEvent } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Tag } from 'lucide-react'
 import type { PersonListItem } from '../types'
 import { ROLE_CATEGORY_STYLES } from '../constants'
 
@@ -94,7 +95,7 @@ export function PersonCard({ person }: PersonCardProps) {
         {/* Skills */}
         {person.skills.length > 0 && (
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="opacity-60">🏷️</span>
+            <Tag className="h-3 w-3 opacity-60" />
             <span className="truncate">
               {person.skills.slice(0, 3).join(' • ')}
             </span>
