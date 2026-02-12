@@ -9,7 +9,6 @@ export interface UserContext {
   roles: string[]
   neighborNetName: string | null
   subregionName: string | null
-  yearJoined: number | null
 }
 
 /**
@@ -73,17 +72,10 @@ export async function fetchUserContext(userId: string): Promise<UserContext | nu
   const neighborNetName = nn?.name || null
   const subregionName = nn?.subregions?.name || null
 
-  // Calculate year joined
-  let yearJoined: number | null = null
-  if (membership?.joined_at) {
-    yearJoined = new Date(membership.joined_at).getFullYear()
-  }
-
   return {
     name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Member',
     roles,
     neighborNetName,
     subregionName,
-    yearJoined,
   }
 }

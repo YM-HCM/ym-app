@@ -42,8 +42,6 @@ export default async function HomePage() {
   const displayRoles = userContext?.roles.length ? userContext.roles : []
   const displayNN = userContext?.neighborNetName || 'No NeighborNet'
   const displaySR = userContext?.subregionName || ''
-  const displayYear = userContext?.yearJoined || new Date().getFullYear()
-
   return (
     <AppShell>
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3.5rem)] md:min-h-screen px-4 py-12">
@@ -58,7 +56,6 @@ export default async function HomePage() {
               roles={displayRoles}
               neighborNetName={displayNN}
               subregionName={displaySR}
-              yearJoined={displayYear}
             />
           </div>
 

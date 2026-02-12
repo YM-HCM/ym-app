@@ -5,13 +5,12 @@ interface PersonalContextCardProps {
   roles: string[]
   neighborNetName: string
   subregionName: string
-  yearJoined: number
 }
 
 /**
  * Displays the user's identity within YM.
  *
- * Shows name, current roles, NeighborNet, Subregion, and year joined.
+ * Shows name, current roles, NeighborNet, and Subregion.
  * Uses a subtle gradient background for visual distinction.
  */
 export function PersonalContextCard({
@@ -19,7 +18,6 @@ export function PersonalContextCard({
   roles,
   neighborNetName,
   subregionName,
-  yearJoined,
 }: PersonalContextCardProps) {
   return (
     <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
@@ -36,10 +34,6 @@ export function PersonalContextCard({
 
         <p className="mt-2 text-sm text-muted-foreground">
           {neighborNetName} · {subregionName}
-        </p>
-
-        <p className="mt-1 text-xs text-muted-foreground">
-          Since {yearJoined}
         </p>
       </CardContent>
     </Card>

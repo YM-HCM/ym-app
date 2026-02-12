@@ -13,9 +13,7 @@ function PersonalContextCardSkeleton() {
         {/* Roles */}
         <Skeleton className="h-4 w-48 mb-3" />
         {/* Location */}
-        <Skeleton className="h-4 w-36 mb-1" />
-        {/* Since year */}
-        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-4 w-36" />
       </CardContent>
     </Card>
   )
