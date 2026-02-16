@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { OnboardingProvider } from "@/contexts/OnboardingContext"
+import { OnboardingReferenceProvider } from "@/contexts/OnboardingReferenceContext"
 import { PageLoader } from "@/components/ui/page-loader"
 import { ONBOARDING_TOTAL_STEPS } from "./constants"
 import Step1PersonalInfo from "./step1-personal-info"
@@ -54,9 +55,11 @@ function OnboardingContent() {
 export default function OnboardingPage() {
   return (
     <OnboardingProvider>
-      <Suspense fallback={<PageLoader />}>
-        <OnboardingContent />
-      </Suspense>
+      <OnboardingReferenceProvider>
+        <Suspense fallback={<PageLoader />}>
+          <OnboardingContent />
+        </Suspense>
+      </OnboardingReferenceProvider>
     </OnboardingProvider>
   )
 }

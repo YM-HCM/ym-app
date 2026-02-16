@@ -115,33 +115,29 @@ export async function fetchOnboardingData(authId: string): Promise<{
 
     const typedUser = user as UserRow
 
-    // Get active membership with neighbor_net info
-    const { data: membership } = await supabase
-      .from('memberships')
-      .select('id, neighbor_net_id, neighbor_nets(id, subregion_id)')
-      .eq('user_id', typedUser.id)
-      .eq('status', 'active')
-      .single()
+    // Fetch memberships, roles, and projects in parallel (all depend on userId only)
+    const [membershipResult, rolesResult, projectsResult] = await Promise.all([
+      supabase
+        .from('memberships')
+        .select('id, neighbor_net_id, neighbor_nets(id, subregion_id)')
+        .eq('user_id', typedUser.id)
+        .eq('status', 'active')
+        .single(),
+      supabase
+        .from('role_assignments')
+        .select('*')
+        .eq('user_id', typedUser.id)
+        .order('start_date', { ascending: false }),
+      supabase
+        .from('user_projects')
+        .select('*')
+        .eq('user_id', typedUser.id)
+        .order('start_year', { ascending: false })
+    ])
 
-    const typedMembership = membership as MembershipRow | null
-
-    // Get role assignments
-    const { data: roles } = await supabase
-      .from('role_assignments')
-      .select('*')
-      .eq('user_id', typedUser.id)
-      .order('start_date', { ascending: false })
-
-    const typedRoles = (roles || []) as RoleAssignmentRow[]
-
-    // Get user projects
-    const { data: projects } = await supabase
-      .from('user_projects')
-      .select('*')
-      .eq('user_id', typedUser.id)
-      .order('start_year', { ascending: false })
-
-    const typedProjects = (projects || []) as UserProjectRow[]
+    const typedMembership = membershipResult.data as MembershipRow | null
+    const typedRoles = (rolesResult.data || []) as RoleAssignmentRow[]
+    const typedProjects = (projectsResult.data || []) as UserProjectRow[]
 
     // Map database data to OnboardingData format
     const onboardingData: OnboardingData = {
@@ -249,11 +245,13 @@ export async function saveStep1(authId: string, data: {
   personalEmail?: string
   ethnicity?: string
   dateOfBirth?: Date
-}): Promise<{ success: boolean; error?: string }> {
+}, userId?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userResult = await getUserId(authId)
-  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
-  const userId = userResult.id
+  if (!userId) {
+    const userResult = await getUserId(authId)
+    if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+    userId = userResult.id
+  }
 
   const { error } = await supabase
     .from('users')
@@ -279,11 +277,13 @@ export async function saveStep1(authId: string, data: {
  */
 export async function saveStep2(authId: string, data: {
   neighborNetId?: string
-}): Promise<{ success: boolean; error?: string }> {
+}, userId?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userResult = await getUserId(authId)
-  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
-  const userId = userResult.id
+  if (!userId) {
+    const userResult = await getUserId(authId)
+    if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+    userId = userResult.id
+  }
 
   if (!data.neighborNetId) {
     return { success: true } // No location to save
@@ -339,11 +339,13 @@ export async function saveStep2(authId: string, data: {
  */
 export async function saveStep3(authId: string, data: {
   ymRoles?: YMRoleEntry[]
-}): Promise<{ success: boolean; error?: string }> {
+}, userId?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userResult = await getUserId(authId)
-  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
-  const userId = userResult.id
+  if (!userId) {
+    const userResult = await getUserId(authId)
+    if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+    userId = userResult.id
+  }
 
   // Get existing role IDs before modifying
   const { data: existingRoles } = await supabase
@@ -409,11 +411,13 @@ export async function saveStep3(authId: string, data: {
  */
 export async function saveStep4(authId: string, data: {
   ymProjects?: YMProjectEntry[]
-}): Promise<{ success: boolean; error?: string }> {
+}, userId?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userResult = await getUserId(authId)
-  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
-  const userId = userResult.id
+  if (!userId) {
+    const userResult = await getUserId(authId)
+    if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+    userId = userResult.id
+  }
 
   // Get existing project IDs before modifying
   const { data: existingProjects } = await supabase
@@ -476,11 +480,13 @@ export async function saveStep4(authId: string, data: {
 export async function saveStep5(authId: string, data: {
   educationLevel?: EducationLevel
   education?: EducationEntry[]
-}): Promise<{ success: boolean; error?: string }> {
+}, userId?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userResult = await getUserId(authId)
-  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
-  const userId = userResult.id
+  if (!userId) {
+    const userResult = await getUserId(authId)
+    if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+    userId = userResult.id
+  }
 
   const { error } = await supabase
     .from('users')
@@ -503,11 +509,13 @@ export async function saveStep5(authId: string, data: {
  */
 export async function saveStep6(authId: string, data: {
   skills?: string[]
-}): Promise<{ success: boolean; error?: string }> {
+}, userId?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userResult = await getUserId(authId)
-  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
-  const userId = userResult.id
+  if (!userId) {
+    const userResult = await getUserId(authId)
+    if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+    userId = userResult.id
+  }
 
   const { error } = await supabase
     .from('users')
@@ -527,11 +535,13 @@ export async function saveStep6(authId: string, data: {
 /**
  * Mark onboarding as complete (Step 7)
  */
-export async function completeOnboarding(authId: string): Promise<{ success: boolean; error?: string }> {
+export async function completeOnboarding(authId: string, userId?: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  const userResult = await getUserId(authId)
-  if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
-  const userId = userResult.id
+  if (!userId) {
+    const userResult = await getUserId(authId)
+    if (!userResult.id) return { success: false, error: userResult.error || 'User not found' }
+    userId = userResult.id
+  }
 
   const { error } = await supabase
     .from('users')

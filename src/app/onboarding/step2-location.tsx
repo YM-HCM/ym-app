@@ -13,58 +13,21 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useOnboarding } from "@/contexts/OnboardingContext"
+import { useOnboardingReference } from "@/contexts/OnboardingReferenceContext"
 import {
   OnboardingLayout,
   OnboardingContent,
   OnboardingLoadingState,
   OnboardingErrorState,
 } from "./components"
-import { fetchSubregions, fetchAllNeighborNets, type Subregion, type NeighborNet } from "@/lib/supabase/queries/location"
 
 export default function Step2() {
   const router = useRouter()
-  const { data, updateData, saveStepData, isSaving, isLoading } = useOnboarding()
+  const { data, updateData, saveStepInBackground, isLoading } = useOnboarding()
+  const { subregions, neighborNets: allNeighborNets, isLoading: isLoadingData, error: loadError } = useOnboardingReference()
 
   const [subregionId, setSubregionId] = useState(data.subregionId ?? "")
   const [neighborNetId, setNeighborNetId] = useState(data.neighborNetId ?? "")
-  const [saveError, setSaveError] = useState<string | null>(null)
-
-  // Fetch location data from Supabase
-  const [subregions, setSubregions] = useState<Subregion[]>([])
-  const [allNeighborNets, setAllNeighborNets] = useState<NeighborNet[]>([])
-  const [isLoadingData, setIsLoadingData] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
-
-  // Fetch subregions and neighbor nets on mount
-  useEffect(() => {
-    const loadLocationData = async () => {
-      setIsLoadingData(true)
-      setLoadError(null)
-
-      const [subregionsResult, neighborNetsResult] = await Promise.all([
-        fetchSubregions(),
-        fetchAllNeighborNets(),
-      ])
-
-      if (subregionsResult.error) {
-        setLoadError(subregionsResult.error)
-        setIsLoadingData(false)
-        return
-      }
-
-      if (neighborNetsResult.error) {
-        setLoadError(neighborNetsResult.error)
-        setIsLoadingData(false)
-        return
-      }
-
-      setSubregions(subregionsResult.data || [])
-      setAllNeighborNets(neighborNetsResult.data || [])
-      setIsLoadingData(false)
-    }
-
-    loadLocationData()
-  }, [])
 
   // Sync state when data loads from Supabase (pre-fill)
   useEffect(() => {
@@ -87,21 +50,16 @@ export default function Step2() {
   }
 
   const handleBack = () => {
-    updateData({ subregionId, neighborNetId })
+    const stepData = { subregionId, neighborNetId }
+    updateData(stepData)
+    saveStepInBackground(2, stepData)
     router.push("/onboarding?step=1")
   }
 
-  const handleNext = async () => {
-    setSaveError(null)
+  const handleNext = () => {
     const stepData = { subregionId, neighborNetId }
-
     updateData(stepData)
-    const result = await saveStepData(2, stepData)
-    if (!result.success) {
-      setSaveError(result.error || "Failed to save. Please try again.")
-      return
-    }
-
+    saveStepInBackground(2, stepData)
     router.push("/onboarding?step=3")
   }
 
@@ -123,9 +81,7 @@ export default function Step2() {
   return (
     <OnboardingLayout
       step={2}
-      error={saveError}
       isValid={isValid}
-      isSaving={isSaving}
       isLoading={isLoading}
       onBack={handleBack}
       onNext={handleNext}

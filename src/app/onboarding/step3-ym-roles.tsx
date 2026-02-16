@@ -15,14 +15,13 @@ import {
 } from "@/components/searchable-combobox"
 import { DateRangeInput } from "@/components/date-range-input"
 import { useOnboarding, YMRoleEntry } from "@/contexts/OnboardingContext"
+import { useOnboardingReference } from "@/contexts/OnboardingReferenceContext"
 import {
   OnboardingLayout,
   OnboardingContent,
   OnboardingLoadingState,
   OnboardingErrorState,
 } from "./components"
-import { fetchRoleTypes, type RoleType } from "@/lib/supabase/queries/roles"
-import { fetchCompletedUsers, type UserOption } from "@/lib/supabase/queries/users"
 
 
 function createEmptyRole(): YMRoleEntry {
@@ -34,45 +33,13 @@ function createEmptyRole(): YMRoleEntry {
 
 export default function Step3() {
   const router = useRouter()
-  const { data, updateData, saveStepData, isSaving, isLoading } = useOnboarding()
+  const { data, updateData, saveStepInBackground, isLoading } = useOnboarding()
+  const { roleTypes, users, isLoading: isLoadingData, error: loadError } = useOnboardingReference()
 
   // Initialize with one empty role entry or from context
   const [roles, setRoles] = useState<YMRoleEntry[]>(
     data.ymRoles?.length ? data.ymRoles : [createEmptyRole()]
   )
-  const [saveError, setSaveError] = useState<string | null>(null)
-
-  // Fetch role types and users from Supabase
-  const [roleTypes, setRoleTypes] = useState<RoleType[]>([])
-  const [users, setUsers] = useState<UserOption[]>([])
-  const [isLoadingData, setIsLoadingData] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
-
-  // Fetch role types and users on mount
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoadingData(true)
-      setLoadError(null)
-
-      const [roleTypesResult, usersResult] = await Promise.all([
-        fetchRoleTypes(),
-        fetchCompletedUsers(),
-      ])
-
-      if (roleTypesResult.error) {
-        setLoadError(roleTypesResult.error)
-        setIsLoadingData(false)
-        return
-      }
-
-      // Users can be empty (no one completed onboarding yet) - that's OK
-      setRoleTypes(roleTypesResult.data || [])
-      setUsers(usersResult.data || [])
-      setIsLoadingData(false)
-    }
-
-    loadData()
-  }, [])
 
   // Sync state when data loads from Supabase (pre-fill)
   useEffect(() => {
@@ -117,21 +84,16 @@ export default function Step3() {
   }
 
   const handleBack = () => {
-    updateData({ ymRoles: roles })
+    const stepData = { ymRoles: roles }
+    updateData(stepData)
+    saveStepInBackground(3, stepData)
     router.push("/onboarding?step=2")
   }
 
-  const handleNext = async () => {
-    setSaveError(null)
+  const handleNext = () => {
     const stepData = { ymRoles: roles }
-
     updateData(stepData)
-    const result = await saveStepData(3, stepData)
-    if (!result.success) {
-      setSaveError(result.error || "Failed to save. Please try again.")
-      return
-    }
-
+    saveStepInBackground(3, stepData)
     router.push("/onboarding?step=4")
   }
 
@@ -195,9 +157,7 @@ export default function Step3() {
   return (
     <OnboardingLayout
       step={3}
-      error={saveError}
       isValid={isValid}
-      isSaving={isSaving}
       isLoading={isLoading}
       onBack={handleBack}
       onNext={handleNext}

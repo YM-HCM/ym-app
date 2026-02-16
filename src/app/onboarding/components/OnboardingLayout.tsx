@@ -1,10 +1,11 @@
 "use client"
 
 import { ReactNode } from "react"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertCircle, RotateCw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { useOnboarding } from "@/contexts/OnboardingContext"
 import { calculateProgress } from "../constants"
 
 interface OnboardingLayoutProps {
@@ -47,6 +48,14 @@ export function OnboardingLayout({
   showBack = step > 1,
 }: OnboardingLayoutProps) {
   const progressPercentage = calculateProgress(step)
+  const { pendingSaveError, saveStepInBackground, clearPendingSaveError } = useOnboarding()
+
+  const handleRetry = () => {
+    if (pendingSaveError) {
+      clearPendingSaveError()
+      saveStepInBackground(pendingSaveError.step, pendingSaveError.data)
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background p-6">
@@ -54,6 +63,17 @@ export function OnboardingLayout({
       <div className="w-full">
         <Progress value={progressPercentage} className="h-2" />
       </div>
+
+      {/* Background Save Error Banner */}
+      {pendingSaveError && (
+        <div className="mt-3 flex w-full max-w-md mx-auto items-center gap-2 rounded-md bg-destructive/10 px-4 py-2.5 text-sm text-destructive">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span className="flex-1">Step {pendingSaveError.step} didn&apos;t save. Your data is safe locally.</span>
+          <button onClick={handleRetry} className="shrink-0 rounded-sm p-1 hover:bg-destructive/10">
+            <RotateCw className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Main Content */}
       {children}

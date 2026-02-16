@@ -12,11 +12,18 @@ import {
 
 export default function Step7() {
   const router = useRouter()
-  const { completeOnboarding, clearData, isSaving } = useOnboarding()
+  const { completeOnboarding, flushPendingSaves, clearData, isSaving } = useOnboarding()
   const [error, setError] = useState<string | null>(null)
 
   const handleComplete = async () => {
     setError(null)
+
+    // Retry any failed background saves before completing
+    const flushResult = await flushPendingSaves()
+    if (!flushResult.success) {
+      setError(flushResult.error || "A previous step failed to save. Please try again.")
+      return
+    }
 
     // Mark onboarding as complete
     const result = await completeOnboarding()

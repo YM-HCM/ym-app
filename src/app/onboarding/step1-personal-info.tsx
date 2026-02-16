@@ -59,14 +59,13 @@ const ETHNICITIES = [
 
 export default function PersonalInfo() {
   const router = useRouter()
-  const { data, updateData, saveStepData, isSaving, isLoading } = useOnboarding()
+  const { data, updateData, saveStepInBackground, isLoading } = useOnboarding()
 
   // Initialize from context (supports back navigation and pre-fill)
   const [phoneNumber, setPhoneNumber] = useState(data.phoneNumber ?? "")
   const [personalEmail, setPersonalEmail] = useState(data.personalEmail ?? "")
   const [ethnicity, setEthnicity] = useState(data.ethnicity ?? "")
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(data.dateOfBirth)
-  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Sync state when data loads from Supabase (pre-fill)
   useEffect(() => {
@@ -103,27 +102,17 @@ export default function PersonalInfo() {
                   ethnicity !== "" &&
                   dateOfBirth !== undefined
 
-  const handleNext = async () => {
-    setSaveError(null)
+  const handleNext = () => {
     const stepData = { phoneNumber, personalEmail, ethnicity, dateOfBirth }
-
-    // Update context and save to Supabase
     updateData(stepData)
-    const result = await saveStepData(1, stepData)
-    if (!result.success) {
-      setSaveError(result.error || "Failed to save. Please try again.")
-      return
-    }
-
+    saveStepInBackground(1, stepData)
     router.push("/onboarding?step=2")
   }
 
   return (
     <OnboardingLayout
       step={1}
-      error={saveError}
       isValid={isValid}
-      isSaving={isSaving}
       isLoading={isLoading}
       onNext={handleNext}
       showBack={false}

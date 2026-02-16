@@ -16,13 +16,13 @@ import {
 } from "@/components/searchable-combobox"
 import { DateRangeInput } from "@/components/date-range-input"
 import { useOnboarding, YMProjectEntry } from "@/contexts/OnboardingContext"
+import { useOnboardingReference } from "@/contexts/OnboardingReferenceContext"
 import {
   OnboardingLayout,
   OnboardingContent,
   OnboardingLoadingState,
   OnboardingErrorState,
 } from "./components"
-import { fetchCompletedUsers, type UserOption } from "@/lib/supabase/queries/users"
 
 // Common YM project types
 const PROJECT_TYPES: ComboboxOption[] = [
@@ -48,40 +48,13 @@ function createEmptyProject(): YMProjectEntry {
 
 export default function Step4() {
   const router = useRouter()
-  const { data, updateData, saveStepData, isSaving, isLoading } = useOnboarding()
+  const { data, updateData, saveStepInBackground, isLoading } = useOnboarding()
+  const { users, isLoading: isLoadingData, error: loadError } = useOnboardingReference()
 
   // Initialize with one empty project entry or from context
   const [projects, setProjects] = useState<YMProjectEntry[]>(
     data.ymProjects?.length ? data.ymProjects : [createEmptyProject()]
   )
-  const [saveError, setSaveError] = useState<string | null>(null)
-
-  // Fetch users from Supabase
-  const [users, setUsers] = useState<UserOption[]>([])
-  const [isLoadingData, setIsLoadingData] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
-
-  // Fetch users on mount
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoadingData(true)
-      setLoadError(null)
-
-      const usersResult = await fetchCompletedUsers()
-
-      if (usersResult.error) {
-        setLoadError(usersResult.error)
-        setIsLoadingData(false)
-        return
-      }
-
-      // Users can be empty (no one completed onboarding yet) - that's OK
-      setUsers(usersResult.data || [])
-      setIsLoadingData(false)
-    }
-
-    loadData()
-  }, [])
 
   // Sync state when data loads from Supabase (pre-fill)
   useEffect(() => {
@@ -120,21 +93,16 @@ export default function Step4() {
   }
 
   const handleBack = () => {
-    updateData({ ymProjects: projects })
+    const stepData = { ymProjects: projects }
+    updateData(stepData)
+    saveStepInBackground(4, stepData)
     router.push("/onboarding?step=3")
   }
 
-  const handleNext = async () => {
-    setSaveError(null)
+  const handleNext = () => {
     const stepData = { ymProjects: projects }
-
     updateData(stepData)
-    const result = await saveStepData(4, stepData)
-    if (!result.success) {
-      setSaveError(result.error || "Failed to save. Please try again.")
-      return
-    }
-
+    saveStepInBackground(4, stepData)
     router.push("/onboarding?step=5")
   }
 
@@ -198,9 +166,7 @@ export default function Step4() {
   return (
     <OnboardingLayout
       step={4}
-      error={saveError}
       isValid={isValid}
-      isSaving={isSaving}
       isLoading={isLoading}
       onBack={handleBack}
       onNext={handleNext}

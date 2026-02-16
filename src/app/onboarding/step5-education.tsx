@@ -67,7 +67,7 @@ function createEmptyEducation(): EducationEntry {
 
 export default function Step5() {
   const router = useRouter()
-  const { data, updateData, saveStepData, isSaving, isLoading } = useOnboarding()
+  const { data, updateData, saveStepInBackground, isLoading } = useOnboarding()
 
   // Education level state
   const [educationLevel, setEducationLevel] = useState<EducationLevel | undefined>(
@@ -78,7 +78,6 @@ export default function Step5() {
   const [education, setEducation] = useState<EducationEntry[]>(
     data.education?.length ? data.education : [createEmptyEducation()]
   )
-  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Sync state when data loads from Supabase (pre-fill)
   useEffect(() => {
@@ -118,21 +117,16 @@ export default function Step5() {
   }
 
   const handleBack = () => {
-    updateData({ educationLevel, education: requiresCollegeEducation ? education : [] })
+    const stepData = { educationLevel, education: requiresCollegeEducation ? education : [] }
+    updateData(stepData)
+    saveStepInBackground(5, stepData)
     router.push("/onboarding?step=4")
   }
 
-  const handleNext = async () => {
-    setSaveError(null)
+  const handleNext = () => {
     const stepData = { educationLevel, education: requiresCollegeEducation ? education : [] }
-
     updateData(stepData)
-    const result = await saveStepData(5, stepData)
-    if (!result.success) {
-      setSaveError(result.error || "Failed to save. Please try again.")
-      return
-    }
-
+    saveStepInBackground(5, stepData)
     router.push("/onboarding?step=6")
   }
 
@@ -164,9 +158,7 @@ export default function Step5() {
   return (
     <OnboardingLayout
       step={5}
-      error={saveError}
       isValid={isValid}
-      isSaving={isSaving}
       isLoading={isLoading}
       onBack={handleBack}
       onNext={handleNext}

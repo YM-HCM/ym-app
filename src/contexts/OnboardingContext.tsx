@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react'
 import { useAuth } from './AuthContext'
 import {
   fetchOnboardingData,
@@ -94,6 +94,12 @@ interface SaveResult {
   error?: string
 }
 
+interface PendingSaveError {
+  step: number
+  error: string
+  data: Partial<OnboardingData>
+}
+
 interface OnboardingContextType {
   data: OnboardingData
   updateData: (partial: Partial<OnboardingData>) => void
@@ -103,6 +109,13 @@ interface OnboardingContextType {
   isSaving: boolean
   // Save functions for each step - accepts data directly to avoid race conditions
   saveStepData: (step: number, stepData: Partial<OnboardingData>) => Promise<SaveResult>
+  // Fire-and-forget save for optimistic navigation
+  saveStepInBackground: (step: number, stepData: Partial<OnboardingData>) => void
+  // Retry any failed background saves (call before completing onboarding)
+  flushPendingSaves: () => Promise<SaveResult>
+  // Background save error state
+  pendingSaveError: PendingSaveError | null
+  clearPendingSaveError: () => void
   completeOnboarding: () => Promise<SaveResult>
   // Status
   isComplete: boolean
@@ -116,6 +129,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
+  const [dbUserId, setDbUserId] = useState<string | null>(null)
+  const [pendingSaveError, setPendingSaveError] = useState<PendingSaveError | null>(null)
+  const failedSaveRef = useRef<PendingSaveError | null>(null)
 
   // Fetch existing data when user is available
   // Use primitive userId instead of user object to prevent infinite loops
@@ -133,6 +149,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         if (result.data) {
           setData(result.data)
           setIsComplete(result.isComplete)
+        }
+        if (result.userId) {
+          setDbUserId(result.userId)
         }
       } catch (error) {
         console.error('Failed to load onboarding data:', error)
@@ -162,6 +181,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     try {
       let result: SaveResult
 
+      const cachedId = dbUserId || undefined
       switch (step) {
         case 1:
           result = await saveStep1(user.id, {
@@ -169,33 +189,33 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
             personalEmail: stepData.personalEmail,
             ethnicity: stepData.ethnicity,
             dateOfBirth: stepData.dateOfBirth
-          })
+          }, cachedId)
           break
         case 2:
           result = await saveStep2(user.id, {
             neighborNetId: stepData.neighborNetId
-          })
+          }, cachedId)
           break
         case 3:
           result = await saveStep3(user.id, {
             ymRoles: stepData.ymRoles
-          })
+          }, cachedId)
           break
         case 4:
           result = await saveStep4(user.id, {
             ymProjects: stepData.ymProjects
-          })
+          }, cachedId)
           break
         case 5:
           result = await saveStep5(user.id, {
             educationLevel: stepData.educationLevel,
             education: stepData.education
-          })
+          }, cachedId)
           break
         case 6:
           result = await saveStep6(user.id, {
             skills: stepData.skills
-          })
+          }, cachedId)
           break
         default:
           result = { success: false, error: 'Invalid step' }
@@ -208,7 +228,42 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false)
     }
-  }, [user?.id])
+  }, [user?.id, dbUserId])
+
+  // Fire-and-forget save for optimistic navigation
+  const saveStepInBackground = useCallback((step: number, stepData: Partial<OnboardingData>) => {
+    saveStepData(step, stepData).then(result => {
+      if (!result.success) {
+        const error: PendingSaveError = { step, error: result.error || 'Failed to save', data: stepData }
+        failedSaveRef.current = error
+        setPendingSaveError(error)
+      } else {
+        // Clear error if this step previously failed and now succeeded
+        if (failedSaveRef.current?.step === step) {
+          failedSaveRef.current = null
+          setPendingSaveError(null)
+        }
+      }
+    })
+  }, [saveStepData])
+
+  // Retry any failed background save before completing onboarding
+  const flushPendingSaves = useCallback(async (): Promise<SaveResult> => {
+    const failed = failedSaveRef.current
+    if (!failed) return { success: true }
+
+    const result = await saveStepData(failed.step, failed.data)
+    if (result.success) {
+      failedSaveRef.current = null
+      setPendingSaveError(null)
+    }
+    return result
+  }, [saveStepData])
+
+  const clearPendingSaveError = useCallback(() => {
+    failedSaveRef.current = null
+    setPendingSaveError(null)
+  }, [])
 
   // Complete onboarding (mark as done)
   const completeOnboarding = useCallback(async (): Promise<SaveResult> => {
@@ -218,7 +273,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
     setIsSaving(true)
     try {
-      const result = await completeOnboardingApi(user.id)
+      const result = await completeOnboardingApi(user.id, dbUserId || undefined)
       if (result.success) {
         setIsComplete(true)
       }
@@ -229,7 +284,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false)
     }
-  }, [user?.id])
+  }, [user?.id, dbUserId])
 
   return (
     <OnboardingContext.Provider value={{
@@ -239,6 +294,10 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       isLoading,
       isSaving,
       saveStepData,
+      saveStepInBackground,
+      flushPendingSaves,
+      pendingSaveError,
+      clearPendingSaveError,
       completeOnboarding,
       isComplete
     }}>

@@ -34,12 +34,11 @@ const SKILLS = [
 
 export default function Step6() {
   const router = useRouter()
-  const { data, updateData, saveStepData, isSaving, isLoading } = useOnboarding()
+  const { data, updateData, saveStepInBackground, isLoading } = useOnboarding()
 
   const [selectedSkills, setSelectedSkills] = useState<string[]>(
     data.skills ?? []
   )
-  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Sync state when data loads from Supabase (pre-fill)
   useEffect(() => {
@@ -58,30 +57,23 @@ export default function Step6() {
   }
 
   const handleBack = () => {
-    updateData({ skills: selectedSkills })
+    const stepData = { skills: selectedSkills }
+    updateData(stepData)
+    saveStepInBackground(6, stepData)
     router.push("/onboarding?step=5")
   }
 
-  const handleNext = async () => {
-    setSaveError(null)
+  const handleNext = () => {
     const stepData = { skills: selectedSkills }
-
     updateData(stepData)
-    const result = await saveStepData(6, stepData)
-    if (!result.success) {
-      setSaveError(result.error || "Failed to save. Please try again.")
-      return
-    }
-
+    saveStepInBackground(6, stepData)
     router.push("/onboarding?step=7")
   }
 
   return (
     <OnboardingLayout
       step={6}
-      error={saveError}
       isValid={isValid}
-      isSaving={isSaving}
       isLoading={isLoading}
       onBack={handleBack}
       onNext={handleNext}
