@@ -1,4 +1,4 @@
-import { GalleryVerticalEnd } from "lucide-react"
+import Image from "next/image"
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -15,10 +15,14 @@ export function YMLoginForm({ onSuccess, onError, error }: YMLoginFormProps) {
         {/* Logo & Title */}
         <div className="flex flex-col items-center gap-2">
           <div className="flex flex-col items-center gap-2 font-medium">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md">
-              <GalleryVerticalEnd className="size-6" />
-            </div>
-            <span className="sr-only">Young Muslims App</span>
+            <Image
+              src="/favicon.ico"
+              alt="Young Muslims"
+              width={32}
+              height={32}
+              className="rounded"
+              priority
+            />
           </div>
           <h1 className="text-xl font-bold">Welcome to Young Muslims App</h1>
         </div>
