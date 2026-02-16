@@ -225,9 +225,7 @@ export default function ProfilePage() {
                 style={{ animationDelay: '300ms' }}
               >
                 <EducationSection
-                  educationLevel={formData.educationLevel}
                   education={formData.education ?? []}
-                  onEducationLevelChange={(v) => updateField('educationLevel', v)}
                   onUpdateEducation={updateEducation}
                   onAddEducation={addEducation}
                   onRemoveEducation={removeEducation}

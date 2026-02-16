@@ -18,7 +18,7 @@ import {
 } from '@/components/searchable-combobox'
 import { ExpandableCard, ExpandableCardList } from './ExpandableCard'
 import { useProfileMode } from '@/contexts/ProfileModeContext'
-import type { EducationEntry, EducationLevel } from '@/contexts/OnboardingContext'
+import type { EducationEntry } from '@/contexts/OnboardingContext'
 
 // Import universities list
 import universitiesData from '@/data/us-universities.json'
@@ -28,13 +28,6 @@ const UNIVERSITIES: ComboboxOption[] = (universitiesData as string[]).map((name:
   value: name.toLowerCase().replace(/\s+/g, '-'),
   label: name,
 }))
-
-// Education level options
-const EDUCATION_LEVELS = [
-  { value: 'high-school-current', label: 'High school (currently attending)' },
-  { value: 'high-school-graduate', label: 'High school graduate (no college)' },
-  { value: 'college', label: 'College (current or completed)' },
-]
 
 // Degree types
 const DEGREE_TYPES = [
@@ -70,34 +63,31 @@ function getEducationSubtitle(edu: EducationEntry): string {
     parts.push(edu.fieldOfStudy)
   }
 
-  if (edu.graduationYear) {
-    parts.push(`Class of ${edu.graduationYear}`)
-  }
-
   return parts.join(' • ')
 }
 
+function getEducationBadge(edu: EducationEntry): string | undefined {
+  if (!edu.graduationYear || edu.graduationYear >= currentYear) {
+    return 'Current'
+  }
+  return undefined
+}
+
 interface EducationSectionProps {
-  educationLevel?: EducationLevel
   education: EducationEntry[]
-  onEducationLevelChange: (level: EducationLevel) => void
   onUpdateEducation: (index: number, updates: Partial<EducationEntry>) => void
   onAddEducation: () => void
   onRemoveEducation: (index: number) => void
 }
 
 export function EducationSection({
-  educationLevel,
   education,
-  onEducationLevelChange,
   onUpdateEducation,
   onAddEducation,
   onRemoveEducation,
 }: EducationSectionProps) {
   const { isEditable } = useProfileMode()
   const [expandedId, setExpandedId] = useState<string | null>(null)
-
-  const requiresCollegeEducation = educationLevel === 'college'
 
   const getSchoolValue = (edu: EducationEntry): ComboboxValue | undefined => {
     if (edu.schoolName) {
@@ -128,18 +118,6 @@ export function EducationSection({
     return degree?.label ?? degreeType
   }
 
-  // Dynamic description based on mode and education level
-  const getSectionDescription = (): string => {
-    if (isEditable) return "Your educational background"
-    if (educationLevel === 'college') return "Educational background"
-    if (educationLevel === 'high-school-current') return "Currently attending high school"
-    if (educationLevel === 'high-school-graduate') return "High school graduate"
-    return "Educational background"
-  }
-
-  // In read-only mode with no education level set, show empty state
-  const showEducationContent = isEditable || !!educationLevel
-
   const emptyState = (
     <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
       <GraduationCap className="h-10 w-10 text-muted-foreground/50 mb-3" />
@@ -150,136 +128,104 @@ export function EducationSection({
   return (
     <ExpandableCardList
       title="Education"
-      description={getSectionDescription()}
-      addLabel={isEditable && requiresCollegeEducation ? "Add another degree" : undefined}
-      onAdd={isEditable && requiresCollegeEducation ? onAddEducation : undefined}
+      description={isEditable ? "Your educational background" : "Educational background"}
+      addLabel={isEditable ? "Add education" : undefined}
+      onAdd={isEditable ? onAddEducation : undefined}
       emptyState={!isEditable ? emptyState : undefined}
     >
-      {showEducationContent && (
-        <>
-          {/* Education Level - only show dropdown in edit mode */}
-          {isEditable && (
-            <div className="flex flex-col gap-1.5">
-              <Label>Education Level</Label>
-              <Select
-                value={educationLevel}
-                onValueChange={(value) => onEducationLevelChange(value as EducationLevel)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your education level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {EDUCATION_LEVELS.map((level) => (
-                    <SelectItem key={level.value} value={level.value}>
-                      {level.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {education.map((edu, index) => (
+        <ExpandableCard
+          key={edu.id}
+          id={edu.id}
+          title={getEducationTitle(edu)}
+          subtitle={getEducationSubtitle(edu)}
+          badge={getEducationBadge(edu)}
+          isExpanded={expandedId === edu.id}
+          onToggle={() => setExpandedId(expandedId === edu.id ? null : edu.id)}
+          onDelete={isEditable ? () => onRemoveEducation(index) : undefined}
+        >
+          {isEditable ? (
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label>School Name</Label>
+                <SearchableCombobox
+                  options={UNIVERSITIES}
+                  value={getSchoolValue(edu)}
+                  onChange={(value) => handleSchoolChange(index, value)}
+                  placeholder="Search for your school"
+                  searchPlaceholder="Type to search universities..."
+                  allowCustom
+                  maxDisplayed={50}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Degree Type</Label>
+                <Select
+                  value={edu.degreeType}
+                  onValueChange={(value) => onUpdateEducation(index, { degreeType: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select degree type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEGREE_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Field of Study</Label>
+                <Input
+                  value={edu.fieldOfStudy ?? ''}
+                  onChange={(e) => onUpdateEducation(index, { fieldOfStudy: e.target.value })}
+                  placeholder="e.g., Computer Science, Business Administration"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Graduation Year (or expected)</Label>
+                <Select
+                  value={edu.graduationYear?.toString()}
+                  onValueChange={(value) =>
+                    onUpdateEducation(index, { graduationYear: parseInt(value, 10) })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GRADUATION_YEARS.map((year) => (
+                      <SelectItem key={year.value} value={year.value}>
+                        {year.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 text-sm">
+              <div>
+                <span className="font-medium text-muted-foreground">Degree:</span>
+                <span className="ml-2 text-foreground">{edu.degreeType ? getDegreeLabel(edu.degreeType) : '—'}</span>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Field of Study:</span>
+                <span className="ml-2 text-foreground">{edu.fieldOfStudy || '—'}</span>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">Graduation Year:</span>
+                <span className="ml-2 text-foreground">{edu.graduationYear || '—'}</span>
+              </div>
             </div>
           )}
-
-          {/* College Education Entries */}
-          {requiresCollegeEducation && education.map((edu, index) => (
-            <ExpandableCard
-              key={edu.id}
-              id={edu.id}
-              title={getEducationTitle(edu)}
-              subtitle={getEducationSubtitle(edu)}
-              isExpanded={expandedId === edu.id}
-              onToggle={() => setExpandedId(expandedId === edu.id ? null : edu.id)}
-              onDelete={isEditable ? () => onRemoveEducation(index) : undefined}
-            >
-              {isEditable ? (
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <Label>School Name</Label>
-                    <SearchableCombobox
-                      options={UNIVERSITIES}
-                      value={getSchoolValue(edu)}
-                      onChange={(value) => handleSchoolChange(index, value)}
-                      placeholder="Search for your school"
-                      searchPlaceholder="Type to search universities..."
-                      allowCustom
-                      maxDisplayed={50}
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label>Degree Type</Label>
-                    <Select
-                      value={edu.degreeType}
-                      onValueChange={(value) => onUpdateEducation(index, { degreeType: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select degree type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DEGREE_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label>Field of Study</Label>
-                    <Input
-                      value={edu.fieldOfStudy ?? ''}
-                      onChange={(e) => onUpdateEducation(index, { fieldOfStudy: e.target.value })}
-                      placeholder="e.g., Computer Science, Business Administration"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label>Graduation Year (or expected)</Label>
-                    <Select
-                      value={edu.graduationYear?.toString()}
-                      onValueChange={(value) =>
-                        onUpdateEducation(index, { graduationYear: parseInt(value, 10) })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select year" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {GRADUATION_YEARS.map((year) => (
-                          <SelectItem key={year.value} value={year.value}>
-                            {year.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3 text-sm">
-                  {edu.degreeType && (
-                    <div>
-                      <span className="font-medium text-muted-foreground">Degree:</span>
-                      <span className="ml-2 text-foreground">{getDegreeLabel(edu.degreeType)}</span>
-                    </div>
-                  )}
-                  {edu.fieldOfStudy && (
-                    <div>
-                      <span className="font-medium text-muted-foreground">Field of Study:</span>
-                      <span className="ml-2 text-foreground">{edu.fieldOfStudy}</span>
-                    </div>
-                  )}
-                  {edu.graduationYear && (
-                    <div>
-                      <span className="font-medium text-muted-foreground">Graduation Year:</span>
-                      <span className="ml-2 text-foreground">{edu.graduationYear}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </ExpandableCard>
-          ))}
-        </>
-      )}
+        </ExpandableCard>
+      ))}
     </ExpandableCardList>
   )
 }

@@ -118,9 +118,7 @@ export default function PersonProfilePage() {
               style={{ animationDelay: '300ms' }}
             >
               <EducationSection
-                educationLevel={personData.educationLevel}
                 education={personData.education ?? []}
-                onEducationLevelChange={noop}
                 onUpdateEducation={noop}
                 onAddEducation={noop}
                 onRemoveEducation={noop}

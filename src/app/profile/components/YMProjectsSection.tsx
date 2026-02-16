@@ -175,7 +175,7 @@ export function YMProjectsSection({
           id={project.id}
           title={getProjectTitle(project)}
           subtitle={getProjectSubtitle(project)}
-          badge={project.isCurrent ? 'Active' : undefined}
+          badge={project.isCurrent ? 'Current' : undefined}
           isExpanded={expandedId === project.id}
           onToggle={() => setExpandedId(expandedId === project.id ? null : project.id)}
           onDelete={isEditable ? () => onRemoveProject(index) : undefined}
