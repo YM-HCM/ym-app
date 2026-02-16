@@ -215,9 +215,18 @@ export function AppSidebar() {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   {/* Avatar - 24px to match logo size in lg variant buttons */}
-                  <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium">
-                    {initials}
-                  </div>
+                  {user?.user_metadata?.avatar_url ? (
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt={capitalizedName}
+                      className="size-6 shrink-0 rounded-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium">
+                      {initials}
+                    </div>
+                  )}
                   {/* Name with inline chevron */}
                   <span className="truncate font-semibold max-w-[100px]">{capitalizedName}</span>
                   <ChevronUp className="ml-auto h-4 w-4 shrink-0" />

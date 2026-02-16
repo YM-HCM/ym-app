@@ -57,6 +57,7 @@ export function PersonCard({ person }: PersonCardProps) {
               src={person.avatarUrl}
               alt={`${person.firstName} ${person.lastName}`}
               className="h-12 w-12 rounded-full object-cover ring-2 ring-background shadow-sm"
+              referrerPolicy="no-referrer"
             />
           ) : (
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5 ring-2 ring-background shadow-sm">

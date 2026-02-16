@@ -137,9 +137,18 @@ export default function ProfilePage() {
           </Button>
 
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <User className="h-5 w-5 text-primary" />
-            </div>
+            {profileData?.avatarUrl ? (
+              <img
+                src={profileData.avatarUrl}
+                alt={`${profileData.firstName ?? ''} ${profileData.lastName ?? ''}`}
+                className="h-10 w-10 rounded-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <User className="h-5 w-5 text-primary" />
+              </div>
+            )}
             <div>
               <h1 className="text-lg font-semibold tracking-tight">My Profile</h1>
               <p className="text-sm text-muted-foreground">

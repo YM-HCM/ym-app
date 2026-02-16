@@ -70,6 +70,7 @@ export function PeopleTable({ people }: PeopleTableProps) {
                   src={person.avatarUrl}
                   alt=""
                   className="h-8 w-8 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
                 />
               ) : (
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary/70">

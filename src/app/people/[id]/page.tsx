@@ -57,6 +57,7 @@ export default function PersonProfilePage() {
                   src={personData.avatarUrl}
                   alt={`${personData.firstName ?? ''} ${personData.lastName ?? ''}`}
                   className="h-10 w-10 rounded-full object-cover ring-2 ring-background shadow-sm"
+                  referrerPolicy="no-referrer"
                 />
               ) : (
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5 ring-2 ring-background shadow-sm">
