@@ -1,7 +1,21 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 import type { PersonListItem, PeopleFilters } from '../types'
+
+const FUSE_OPTIONS: IFuseOptions<PersonListItem> = {
+  threshold: 0.35,
+  ignoreLocation: true,
+  keys: [
+    { name: 'firstName', weight: 2 },
+    { name: 'lastName', weight: 2 },
+    { name: 'roles.name', weight: 1.5 },
+    { name: 'region.name', weight: 1 },
+    { name: 'subregion.name', weight: 1 },
+    { name: 'skills', weight: 1 },
+  ],
+}
 
 function getInitialFilters(): PeopleFilters {
   return {
@@ -59,17 +73,15 @@ export function usePeopleFilters(people: PersonListItem[]): UsePeopleFiltersRetu
     setFilters(getInitialFilters())
   }, [])
 
-  const filteredPeople = useMemo(() => {
-    return people.filter((person) => {
-      // Search filter (name match)
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase()
-        const fullName = `${person.firstName} ${person.lastName}`.toLowerCase()
-        if (!fullName.includes(searchLower)) {
-          return false
-        }
-      }
+  const fuse = useMemo(() => new Fuse(people, FUSE_OPTIONS), [people])
 
+  const filteredPeople = useMemo(() => {
+    // Start from fuzzy results (preserving relevance order) or full list
+    const candidates = filters.search
+      ? fuse.search(filters.search).map((r) => r.item)
+      : people
+
+    return candidates.filter((person) => {
       // Region filter
       if (filters.regions.length > 0) {
         if (!person.region || !filters.regions.includes(person.region.id)) {
@@ -129,7 +141,7 @@ export function usePeopleFilters(people: PersonListItem[]): UsePeopleFiltersRetu
 
       return true
     })
-  }, [people, filters])
+  }, [people, fuse, filters])
 
   // Pagination state for Load More
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
