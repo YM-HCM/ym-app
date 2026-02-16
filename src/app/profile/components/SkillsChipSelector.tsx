@@ -1,8 +1,10 @@
 'use client'
 
+import { Check, Sparkles } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
+import { useProfileMode } from '@/contexts/ProfileModeContext'
 import { cn } from '@/lib/utils'
-import { Check } from 'lucide-react'
 
 // YM-relevant skills (matching step6-skills.tsx)
 export const SKILLS = [
@@ -43,62 +45,87 @@ export function SkillsChipSelector({
   maxSelection = 5,
   className,
 }: SkillsChipSelectorProps) {
+  const { isEditable } = useProfileMode()
   const selectionCount = selectedSkills.length
   const isAtMax = selectionCount >= maxSelection
   const isValid = selectionCount >= minSelection && selectionCount <= maxSelection
+
+  const selectedSkillItems = SKILLS.filter((skill) => selectedSkills.includes(skill.id))
 
   return (
     <section className={cn('space-y-5', className)}>
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-foreground">Skills</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Select {minSelection} to {maxSelection} skills that best describe you
-          </p>
+          {isEditable && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              Select {minSelection} to {maxSelection} skills that best describe you
+            </p>
+          )}
         </div>
-        <Badge
-          variant={isValid ? 'default' : 'secondary'}
-          className="shrink-0"
-        >
-          {selectionCount} of {maxSelection}
-        </Badge>
+        {isEditable && (
+          <Badge
+            variant={isValid ? 'default' : 'secondary'}
+            className="shrink-0"
+          >
+            {selectionCount} of {maxSelection}
+          </Badge>
+        )}
       </div>
 
+      {!isEditable && selectedSkillItems.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-center rounded-lg border border-dashed">
+          <Sparkles className="h-10 w-10 text-muted-foreground/50 mb-3" />
+          <p className="text-sm text-muted-foreground">No skills added yet</p>
+        </div>
+      ) : (
       <div className="flex flex-wrap gap-3">
-        {SKILLS.map((skill) => {
-          const isSelected = selectedSkills.includes(skill.id)
-          const isDisabled = isAtMax && !isSelected
+        {isEditable
+          ? SKILLS.map((skill) => {
+              const isSelected = selectedSkills.includes(skill.id)
+              const isDisabled = isAtMax && !isSelected
 
-          return (
-            <button
-              key={skill.id}
-              type="button"
-              onClick={() => !isDisabled && onToggle(skill.id)}
-              disabled={isDisabled}
-              className={cn(
-                'group focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full',
-                'transition-all duration-200'
-              )}
-            >
+              return (
+                <button
+                  key={skill.id}
+                  type="button"
+                  onClick={() => !isDisabled && onToggle(skill.id)}
+                  disabled={isDisabled}
+                  className={cn(
+                    'group focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full',
+                    'transition-all duration-200'
+                  )}
+                >
+                  <Badge
+                    variant={isSelected ? 'default' : 'secondary'}
+                    className={cn(
+                      'px-3 py-1.5 text-sm cursor-pointer transition-all duration-200',
+                      'flex items-center gap-1.5',
+                      isSelected && 'pr-2.5',
+                      isDisabled && 'opacity-50 cursor-not-allowed',
+                      !isDisabled && !isSelected && 'hover:bg-accent hover:text-accent-foreground'
+                    )}
+                  >
+                    {isSelected && (
+                      <Check className="h-3 w-3" />
+                    )}
+                    {skill.label}
+                  </Badge>
+                </button>
+              )
+            })
+          : selectedSkillItems.map((skill) => (
               <Badge
-                variant={isSelected ? 'default' : 'secondary'}
-                className={cn(
-                  'px-3 py-1.5 text-sm cursor-pointer transition-all duration-200',
-                  'flex items-center gap-1.5',
-                  isSelected && 'pr-2.5',
-                  isDisabled && 'opacity-50 cursor-not-allowed',
-                  !isDisabled && !isSelected && 'hover:bg-accent hover:text-accent-foreground'
-                )}
+                key={skill.id}
+                variant="default"
+                className="px-3 py-1.5 text-sm"
               >
-                {isSelected && (
-                  <Check className="h-3 w-3" />
-                )}
                 {skill.label}
               </Badge>
-            </button>
-          )
-        })}
+            ))
+        }
       </div>
+      )}
     </section>
   )
 }
