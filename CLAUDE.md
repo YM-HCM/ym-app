@@ -23,6 +23,14 @@
 - Card padding: `p-6`. Empty states: Lucide icon in `rounded-full bg-muted/50 p-4`, no emojis, no CTAs
 - Responsive: test at 375px, 393px, 430px, 1280px+
 
+### ExpandableCard Sections (Roles, Projects, Education)
+All profile list sections use `ExpandableCardList` → `ExpandableCard` and must stay consistent:
+- **Badge text**: Always `"Current"` (never "Active" or other variants)
+- **Subtitle separator**: `•` (U+2022 BULLET) via `parts.join(' • ')`
+- **Read-only fields**: Key identifying fields always show with `'—'` dash fallback. Description/notes only shown if content exists.
+- **Section descriptions**: "Your [noun]" in edit mode, drop "Your" in read-only
+- **Empty state**: Only in read-only mode (`!isEditable`). Edit mode shows just the "Add" button.
+
 ## State Management
 - **React Context** for multi-page state (OnboardingContext)
 - **Custom Hooks** for single-page form state (useProfileForm)
