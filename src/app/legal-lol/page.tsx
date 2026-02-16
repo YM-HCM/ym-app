@@ -1,37 +1,52 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
 
 export default function LegalLolPage() {
+  const [imageReady, setImageReady] = useState(false)
   const [imageSrc, setImageSrc] = useState<string | null>(null)
-  const [revealed, setRevealed] = useState(false)
+  const [entered, setEntered] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
+  // Fetch and preload image
   useEffect(() => {
     fetch('/api/legal-lol')
       .then(res => res.json())
       .then(data => setImageSrc(data.image))
       .catch(() => setImageSrc('/legal-lol/aqil_peace.jpg'))
-
-    const timer = setTimeout(() => setRevealed(true), 500)
-    return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
-    if (!revealed || !imageSrc) return
+    if (!imageSrc) return
 
+    const img = new Image()
+    img.onload = () => setImageReady(true)
+    img.onerror = () => setImageReady(true)
+    img.src = imageSrc
+  }, [imageSrc])
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+      }
+    }
+  }, [])
+
+  function handleEnter() {
     const audio = new Audio('/legal-lol/rahman.mp3')
     audio.loop = true
+    audioRef.current = audio
     audio.play().catch(() => {})
+    setEntered(true)
+  }
 
-    return () => {
-      audio.pause()
-      audio.src = ''
-    }
-  }, [revealed, imageSrc])
-
-  if (!revealed || !imageSrc) {
+  // Loading state — fetching and preloading image
+  if (!imageReady) {
     return (
       <div className="fixed inset-0 bg-background flex flex-col items-center justify-center gap-4">
         <Loader2 className="size-8 animate-spin text-muted-foreground" />
@@ -41,12 +56,28 @@ export default function LegalLolPage() {
     )
   }
 
+  // Ready state — image preloaded, waiting for user tap
+  if (!entered) {
+    return (
+      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center gap-6">
+        <p className="text-sm text-muted-foreground">Your legal documents are ready.</p>
+        <button
+          onClick={handleEnter}
+          className="text-sm text-primary animate-pulse cursor-pointer"
+        >
+          Tap to accept terms &amp; conditions
+        </button>
+      </div>
+    )
+  }
+
+  // Revealed state — full-screen image + audio playing
   return (
     <>
       <title>LEGALLY BINDING AGREEMENT</title>
       <div className="min-h-screen bg-black">
         <img
-          src={imageSrc}
+          src={imageSrc!}
           alt="Legal Documentation"
           className="w-full"
         />
