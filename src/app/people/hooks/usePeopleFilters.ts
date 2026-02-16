@@ -5,8 +5,9 @@ import Fuse, { type IFuseOptions } from 'fuse.js'
 import type { PersonListItem, PeopleFilters } from '../types'
 
 const FUSE_OPTIONS: IFuseOptions<PersonListItem> = {
-  threshold: 0.35,
+  threshold: 0.3,
   ignoreLocation: true,
+  minMatchCharLength: 2,
   keys: [
     { name: 'firstName', weight: 2 },
     { name: 'lastName', weight: 2 },
