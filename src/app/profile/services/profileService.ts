@@ -9,16 +9,18 @@ interface SaveProfileResult {
   error?: string
 }
 
-// Transform form education entries to DB format (returns Json-compatible array)
+// Transform form education entries to DB format, filtering out empty entries
 function transformEducationToDb(education: ProfileFormState['education']): Json {
   if (!education) return []
-  return education.map((edu) => ({
-    school_name: edu.schoolName,
-    school_custom: edu.schoolCustom,
-    degree_type: edu.degreeType,
-    field_of_study: edu.fieldOfStudy,
-    graduation_year: edu.graduationYear,
-  }))
+  return education
+    .filter(edu => edu.schoolName || edu.schoolCustom || edu.degreeType || edu.fieldOfStudy || edu.graduationYear)
+    .map((edu) => ({
+      school_name: edu.schoolName,
+      school_custom: edu.schoolCustom,
+      degree_type: edu.degreeType,
+      field_of_study: edu.fieldOfStudy,
+      graduation_year: edu.graduationYear,
+    }))
 }
 
 // Helper to convert month/year to date string

@@ -77,16 +77,18 @@ function transformProjects(projects: UserProject[]): YMProjectEntry[] {
   }))
 }
 
-// Transform education JSONB to form format
+// Transform education JSONB to form format, filtering out empty entries
 function transformEducation(education: EducationJson[]): EducationEntry[] {
-  return education.map((edu, index) => ({
-    id: `edu-${index}`,
-    schoolName: edu.school_name,
-    schoolCustom: edu.school_custom,
-    degreeType: edu.degree_type,
-    fieldOfStudy: edu.field_of_study,
-    graduationYear: edu.graduation_year,
-  }))
+  return education
+    .filter(edu => edu.school_name || edu.school_custom || edu.degree_type || edu.field_of_study || edu.graduation_year)
+    .map((edu, index) => ({
+      id: `edu-${index}`,
+      schoolName: edu.school_name,
+      schoolCustom: edu.school_custom,
+      degreeType: edu.degree_type,
+      fieldOfStudy: edu.field_of_study,
+      graduationYear: edu.graduation_year,
+    }))
 }
 
 /**
