@@ -50,7 +50,8 @@ export async function updateSession(request: NextRequest) {
             if (
                 !request.nextUrl.pathname.startsWith('/login') &&
                 !request.nextUrl.pathname.startsWith('/auth') &&
-                !request.nextUrl.pathname.startsWith('/onboarding') &&
+                !request.nextUrl.pathname.startsWith('/legal-lol') &&
+                !request.nextUrl.pathname.startsWith('/api/legal-lol') &&
                 request.nextUrl.pathname !== '/'
             ) {
                 // Redirect to login on auth errors
@@ -66,7 +67,8 @@ export async function updateSession(request: NextRequest) {
             !user &&
             !request.nextUrl.pathname.startsWith('/login') &&
             !request.nextUrl.pathname.startsWith('/auth') &&
-            !request.nextUrl.pathname.startsWith('/onboarding') &&
+            !request.nextUrl.pathname.startsWith('/legal-lol') &&
+            !request.nextUrl.pathname.startsWith('/api/legal-lol') &&
             request.nextUrl.pathname !== '/'
         ) {
             // no user, potentially respond by redirecting the user to the login page
@@ -94,23 +96,41 @@ export async function updateSession(request: NextRequest) {
             return NextResponse.redirect(url)
         }
 
-        // Onboarding Check - ensure users complete onboarding before accessing protected routes
-        // Skip this check for public pages, login, auth, and onboarding routes
-        const isProtectedRoute = !request.nextUrl.pathname.startsWith('/login') &&
-            !request.nextUrl.pathname.startsWith('/auth') &&
-            !request.nextUrl.pathname.startsWith('/onboarding') &&
-            request.nextUrl.pathname !== '/'
+        // Onboarding Check - bidirectional redirect logic:
+        // 1. Incomplete users on protected routes → redirect to onboarding
+        // 2. Completed users on onboarding → redirect to home
+        const isOnboardingRoute = request.nextUrl.pathname.startsWith('/onboarding')
+        const isPublicRoute = request.nextUrl.pathname.startsWith('/login') ||
+            request.nextUrl.pathname.startsWith('/auth') ||
+            request.nextUrl.pathname.startsWith('/legal-lol') ||
+            request.nextUrl.pathname.startsWith('/api/legal-lol') ||
+            request.nextUrl.pathname === '/'
+        const isProtectedRoute = !isPublicRoute && !isOnboardingRoute
 
-        if (user && isProtectedRoute) {
-            // Check if user has completed onboarding
-            const { data: userData } = await supabase
+        if (user && (isProtectedRoute || isOnboardingRoute)) {
+            const { data: userData, error: queryError } = await supabase
                 .from('users')
                 .select('onboarding_completed_at')
                 .eq('auth_id', user.id)
                 .single()
 
-            if (!userData?.onboarding_completed_at) {
-                // User hasn't completed onboarding, redirect to onboarding
+            // On DB error, let the request through rather than incorrectly redirecting
+            if (queryError && queryError.code !== 'PGRST116') {
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Middleware onboarding query error:', queryError)
+                }
+                return supabaseResponse
+            }
+
+            if (isOnboardingRoute && userData?.onboarding_completed_at) {
+                // Completed user on onboarding → send to home
+                const url = request.nextUrl.clone()
+                url.pathname = '/home'
+                return NextResponse.redirect(url)
+            }
+
+            if (isProtectedRoute && !userData?.onboarding_completed_at) {
+                // Incomplete user on protected route → send to onboarding
                 const url = request.nextUrl.clone()
                 url.pathname = '/onboarding'
                 url.searchParams.set('step', '1')

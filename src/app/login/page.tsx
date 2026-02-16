@@ -2,20 +2,26 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { YMLoginForm } from '@/components/auth/YMLoginForm'
 import { PageLoader } from '@/components/ui/page-loader'
+import { supabase } from '@/lib/supabase'
+import { checkOnboardingComplete } from '@/lib/supabase/onboarding'
 
 export default function LoginPage() {
   const { user, loading } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [showLoader, setShowLoader] = useState(false)
   const router = useRouter()
+  const isRedirecting = useRef(false)
 
-  // Redirect if already logged in
+  // Redirect if already logged in — check onboarding status first
   useEffect(() => {
-    if (user && !loading) {
-      router.push('/onboarding?step=1')
+    if (user && !loading && !isRedirecting.current) {
+      isRedirecting.current = true
+      checkOnboardingComplete(user.id).then(isComplete => {
+        router.push(isComplete ? '/home' : '/onboarding?step=1')
+      })
     }
   }, [user, loading, router])
 
@@ -29,8 +35,14 @@ export default function LoginPage() {
     return () => clearTimeout(timer)
   }, [loading])
 
-  const handleGoogleSuccess = () => {
-    router.push('/onboarding?step=1')
+  const handleGoogleSuccess = async () => {
+    if (isRedirecting.current) return
+    isRedirecting.current = true
+    // Get the freshly authenticated user and check onboarding status
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) { isRedirecting.current = false; return }
+    const isComplete = await checkOnboardingComplete(authUser.id)
+    router.push(isComplete ? '/home' : '/onboarding?step=1')
   }
 
   const handleGoogleError = (errorMessage: string) => {
