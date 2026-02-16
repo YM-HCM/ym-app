@@ -17,6 +17,9 @@ import { fetchAllUsersForSelection } from '@/lib/supabase/queries/users'
 import { fetchRoleTypes } from '@/lib/supabase/queries/roles'
 
 function getRoleTitle(role: YMRoleEntry, roleOptions: ComboboxOption[]): string {
+  if (role.roleTypeName) {
+    return role.roleTypeName
+  }
   if (role.roleTypeId) {
     const found = roleOptions.find(r => r.value === role.roleTypeId)
     return found?.label ?? role.roleTypeId
@@ -63,11 +66,14 @@ export function YMRolesSection({
 }: YMRolesSectionProps) {
   const { isEditable } = useProfileMode()
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [optionsLoaded, setOptionsLoaded] = useState(false)
+  const [optionsLoaded, setOptionsLoaded] = useState(!isEditable)
   const [roleOptions, setRoleOptions] = useState<ComboboxOption[]>([])
   const [amirOptions, setAmirOptions] = useState<ComboboxOption[]>([])
 
+  // Only fetch dropdown options in edit mode — read-only uses pre-resolved names from the query
   useEffect(() => {
+    if (!isEditable) return
+
     async function loadOptions() {
       const [rolesResult, usersResult] = await Promise.all([
         fetchRoleTypes(),
@@ -82,7 +88,7 @@ export function YMRolesSection({
       setOptionsLoaded(true)
     }
     loadOptions()
-  }, [])
+  }, [isEditable])
 
   const getRoleComboboxValue = (role: YMRoleEntry): ComboboxValue | undefined => {
     if (role.roleTypeId) {
@@ -108,11 +114,11 @@ export function YMRolesSection({
 
   const handleRoleTypeChange = (index: number, value: ComboboxValue | undefined) => {
     if (!value) {
-      onUpdateRole(index, { roleTypeId: undefined, roleTypeCustom: undefined })
+      onUpdateRole(index, { roleTypeId: undefined, roleTypeName: undefined, roleTypeCustom: undefined })
     } else if (value.type === 'existing') {
-      onUpdateRole(index, { roleTypeId: value.value, roleTypeCustom: undefined })
+      onUpdateRole(index, { roleTypeId: value.value, roleTypeName: value.label, roleTypeCustom: undefined })
     } else {
-      onUpdateRole(index, { roleTypeId: undefined, roleTypeCustom: value.value })
+      onUpdateRole(index, { roleTypeId: undefined, roleTypeName: undefined, roleTypeCustom: value.value })
     }
   }
 
@@ -150,7 +156,7 @@ export function YMRolesSection({
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-foreground">YM Roles</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isEditable ? "Your positions and responsibilities in the organization" : "Positions and responsibilities in the organization"}
+            Your positions and responsibilities in the organization
           </p>
         </div>
         <div className="flex justify-center py-8">

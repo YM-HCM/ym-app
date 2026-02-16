@@ -5,6 +5,7 @@ import type { YMRoleEntry, YMProjectEntry, EducationEntry, EducationLevel } from
 
 // Type aliases for cleaner code
 type RoleAssignment = Tables<'role_assignments'>
+type RoleAssignmentWithType = RoleAssignment & { role_types: { name: string } | null }
 type UserProject = Tables<'user_projects'>
 
 // Education entry stored as JSONB in users table
@@ -38,14 +39,16 @@ function parseDateToLocal(dateStr: string | null | undefined): Date | undefined 
 }
 
 // Transform role assignments from DB to form format
-function transformRoles(roles: RoleAssignment[]): YMRoleEntry[] {
+function transformRoles(roles: RoleAssignmentWithType[]): YMRoleEntry[] {
   return roles.map((role) => {
     const startParsed = parseDateString(role.start_date)
     const endParsed = parseDateString(role.end_date)
+    const roleType = role.role_types as { name: string } | null
 
     return {
       id: role.id,
       roleTypeId: role.role_type_id ?? undefined,
+      roleTypeName: roleType?.name ?? undefined,
       roleTypeCustom: role.role_type_custom ?? undefined,
       amirUserId: role.amir_user_id ?? undefined,
       amirCustomName: role.amir_custom_name ?? undefined,
@@ -122,7 +125,7 @@ export async function fetchUserProfileById(userId: string): Promise<{
     const [rolesResult, projectsResult, membershipResult] = await Promise.all([
       supabase
         .from('role_assignments')
-        .select('*')
+        .select('*, role_types(name)')
         .eq('user_id', user.id)
         .order('start_date', { ascending: false }),
       supabase
@@ -178,7 +181,7 @@ export async function fetchUserProfileById(userId: string): Promise<{
       dateOfBirth: parseDateToLocal(user.date_of_birth),
       subregionId,
       neighborNetId,
-      ymRoles: transformRoles(rolesResult.data ?? []),
+      ymRoles: transformRoles((rolesResult.data ?? []) as RoleAssignmentWithType[]),
       ymProjects: transformProjects(projectsResult.data ?? []),
       educationLevel: (user.education_level as EducationLevel) ?? undefined,
       education: transformEducation((user.education ?? []) as EducationJson[]),

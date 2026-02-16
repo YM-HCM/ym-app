@@ -17,6 +17,7 @@ import {
 export interface YMRoleEntry {
   id: string
   roleTypeId?: string
+  roleTypeName?: string
   roleTypeCustom?: string
   amirUserId?: string
   amirCustomName?: string
