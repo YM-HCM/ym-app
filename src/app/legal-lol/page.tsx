@@ -27,21 +27,23 @@ export default function LegalLolPage() {
     img.src = imageSrc
   }, [imageSrc])
 
-  // Cleanup audio on unmount
+  // Preload audio so it's ready when the user taps.
+  // Mobile browsers (especially iOS Safari) need the audio fully buffered
+  // before .play() is called inside a user-gesture handler.
   useEffect(() => {
+    const audio = new Audio('/legal-lol/rahman.mp3')
+    audio.loop = true
+    audio.preload = 'auto'
+    audioRef.current = audio
+
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current.src = ''
-      }
+      audio.pause()
+      audio.src = ''
     }
   }, [])
 
   function handleEnter() {
-    const audio = new Audio('/legal-lol/rahman.mp3')
-    audio.loop = true
-    audioRef.current = audio
-    audio.play().catch(() => {})
+    audioRef.current?.play().catch(() => {})
     setEntered(true)
   }
 
