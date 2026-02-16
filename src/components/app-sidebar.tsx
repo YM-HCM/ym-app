@@ -80,8 +80,11 @@ export function AppSidebar() {
   }
 
   const handleFeedback = () => {
-    // TODO: Implement feedback action (external link, modal, or defer)
-    console.log('Share feedback clicked')
+    if (isMobile) setOpenMobile(false)
+    window.open(
+      'https://wa.me/15169378725?text=Assalamu%20alaykum%20my%20beloved%20brother.%20This%20app%20has%20caused%20me%20emotional%20damage.%20My%20grievances%20are%20as%20follows%3A%20',
+      '_blank'
+    )
   }
 
   // Handle click on collapsed sidebar to expand
