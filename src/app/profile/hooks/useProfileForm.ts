@@ -15,6 +15,8 @@ export interface ProfileFormState extends OnboardingData {
   // Display name fields (read-only for viewing profiles)
   firstName?: string
   lastName?: string
+  // Profile picture URL (from Google OAuth)
+  avatarUrl?: string
 }
 
 interface UseProfileFormReturn {

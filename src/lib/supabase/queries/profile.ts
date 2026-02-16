@@ -184,6 +184,7 @@ export async function fetchUserProfileById(userId: string): Promise<{
       googleEmail: user.email,
       firstName: user.first_name ?? undefined,
       lastName: user.last_name ?? undefined,
+      avatarUrl: user.avatar_url ?? undefined,
       phoneNumber: user.phone ?? undefined,
       personalEmail: user.personal_email ?? undefined,
       ethnicity: user.ethnicity ?? undefined,

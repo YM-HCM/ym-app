@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, User } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ProfileModeProvider } from '@/contexts/ProfileModeContext'
 import { usePersonProfile } from '@/app/profile/hooks/usePersonProfile'
@@ -52,9 +52,19 @@ export default function PersonProfilePage() {
             </Button>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <User className="h-5 w-5 text-primary" />
-              </div>
+              {personData.avatarUrl ? (
+                <img
+                  src={personData.avatarUrl}
+                  alt={`${personData.firstName ?? ''} ${personData.lastName ?? ''}`}
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-background shadow-sm"
+                />
+              ) : (
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5 ring-2 ring-background shadow-sm">
+                  <span className="text-sm font-semibold text-primary/70">
+                    {(personData.firstName?.charAt(0) ?? '')}{(personData.lastName?.charAt(0) ?? '')}
+                  </span>
+                </div>
+              )}
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">
                   {personData.firstName && personData.lastName
