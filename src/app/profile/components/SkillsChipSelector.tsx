@@ -34,7 +34,6 @@ interface SkillsChipSelectorProps {
   selectedSkills: string[]
   onToggle: (skillId: string) => void
   minSelection?: number
-  maxSelection?: number
   className?: string
 }
 
@@ -42,13 +41,11 @@ export function SkillsChipSelector({
   selectedSkills,
   onToggle,
   minSelection = 3,
-  maxSelection = 5,
   className,
 }: SkillsChipSelectorProps) {
   const { isEditable } = useProfileMode()
   const selectionCount = selectedSkills.length
-  const isAtMax = selectionCount >= maxSelection
-  const isValid = selectionCount >= minSelection && selectionCount <= maxSelection
+  const isValid = selectionCount >= minSelection
 
   const selectedSkillItems = SKILLS.filter((skill) => selectedSkills.includes(skill.id))
 
@@ -59,7 +56,7 @@ export function SkillsChipSelector({
           <h2 className="text-xl font-semibold tracking-tight text-foreground">Skills</h2>
           {isEditable && (
             <p className="mt-1 text-sm text-muted-foreground">
-              Select {minSelection} to {maxSelection} skills that best describe you
+              Select at least {minSelection} skills that best describe you
             </p>
           )}
         </div>
@@ -68,7 +65,7 @@ export function SkillsChipSelector({
             variant={isValid ? 'default' : 'secondary'}
             className="shrink-0"
           >
-            {selectionCount} of {maxSelection}
+            {selectionCount} selected
           </Badge>
         )}
       </div>
@@ -83,14 +80,12 @@ export function SkillsChipSelector({
         {isEditable
           ? SKILLS.map((skill) => {
               const isSelected = selectedSkills.includes(skill.id)
-              const isDisabled = isAtMax && !isSelected
 
               return (
                 <button
                   key={skill.id}
                   type="button"
-                  onClick={() => !isDisabled && onToggle(skill.id)}
-                  disabled={isDisabled}
+                  onClick={() => onToggle(skill.id)}
                   className={cn(
                     'group focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full',
                     'transition-all duration-200'
@@ -102,8 +97,7 @@ export function SkillsChipSelector({
                       'px-3 py-1.5 text-sm cursor-pointer transition-all duration-200',
                       'flex items-center gap-1.5',
                       isSelected && 'pr-2.5',
-                      isDisabled && 'opacity-50 cursor-not-allowed',
-                      !isDisabled && !isSelected && 'hover:bg-accent hover:text-accent-foreground'
+                      !isSelected && 'hover:bg-accent hover:text-accent-foreground'
                     )}
                   >
                     {isSelected && (

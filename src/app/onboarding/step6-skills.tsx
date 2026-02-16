@@ -46,8 +46,8 @@ export default function Step6() {
     if (data.skills?.length) setSelectedSkills(data.skills)
   }, [data.skills])
 
-  // Validation: must select between 3 and 5 skills
-  const isValid = selectedSkills.length >= 3 && selectedSkills.length <= 5
+  // Validation: must select at least 3 skills
+  const isValid = selectedSkills.length >= 3
 
   const toggleSkill = (skillId: string) => {
     setSelectedSkills((prev) =>
@@ -88,7 +88,7 @@ export default function Step6() {
     >
       <OnboardingContent
         title="What are your top skills?"
-        subtitle="Select 3 to 5 skills that best describe you"
+        subtitle="Select at least 3 skills that best describe you"
         maxWidth="max-w-2xl"
       >
         {/* Skills Grid */}
