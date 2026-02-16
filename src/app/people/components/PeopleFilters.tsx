@@ -61,8 +61,14 @@ export function PeopleFilters({
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="h-8 gap-1.5">
-            <Filter className="h-3.5 w-3.5" />
+            <Filter className={`h-3.5 w-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
             <span>Filter</span>
+            {hasActiveFilters && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                {activeCategories.length}
+                <span className="sr-only"> active filters</span>
+              </span>
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">

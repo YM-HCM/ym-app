@@ -3,6 +3,7 @@
 import { Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 interface PeopleSearchProps {
   value: string
@@ -25,17 +26,21 @@ export function PeopleSearch({
         placeholder={placeholder}
         className="pl-9 pr-9 h-10 bg-background"
       />
-      {value && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onChange('')}
-          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
-        >
-          <X className="h-3.5 w-3.5" />
-          <span className="sr-only">Clear search</span>
-        </Button>
-      )}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => onChange('')}
+        className={cn(
+          'absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7',
+          'text-muted-foreground hover:text-foreground',
+          'transition-opacity duration-200',
+          value ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        )}
+        tabIndex={value ? 0 : -1}
+      >
+        <X className="h-3.5 w-3.5" />
+        <span className="sr-only">Clear search</span>
+      </Button>
     </div>
   )
 }

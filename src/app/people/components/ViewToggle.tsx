@@ -12,12 +12,12 @@ interface ViewToggleProps {
 export function ViewToggle({ view, onChange }: ViewToggleProps) {
   return (
     <Tabs value={view} onValueChange={(v) => onChange(v as ViewMode)}>
-      <TabsList className="h-8 p-0.5">
-        <TabsTrigger value="cards" className="h-7 w-8 p-0">
+      <TabsList className="h-9 p-0.5">
+        <TabsTrigger value="cards" className="h-8 w-9 p-0">
           <LayoutGrid className="h-4 w-4" />
           <span className="sr-only">Card view</span>
         </TabsTrigger>
-        <TabsTrigger value="table" className="h-7 w-8 p-0">
+        <TabsTrigger value="table" className="h-8 w-9 p-0">
           <List className="h-4 w-4" />
           <span className="sr-only">Table view</span>
         </TabsTrigger>
