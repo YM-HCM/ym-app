@@ -17,13 +17,14 @@ export function PeopleSearch({
   placeholder = 'Search people...',
 }: PeopleSearchProps) {
   return (
-    <div className="relative flex-1 max-w-md">
+    <div className="relative w-full sm:w-80">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
       <Input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
         className="pl-9 pr-9 h-10 bg-background"
       />
       <Button
