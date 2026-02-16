@@ -14,34 +14,11 @@ import { ExpandableCard, ExpandableCardList } from './ExpandableCard'
 import { useProfileMode } from '@/contexts/ProfileModeContext'
 import type { YMRoleEntry } from '@/contexts/OnboardingContext'
 import { fetchAllUsersForSelection } from '@/lib/supabase/queries/users'
+import { fetchRoleTypes } from '@/lib/supabase/queries/roles'
 
-// YM Role types from step3-ym-roles.tsx
-const YM_ROLES: ComboboxOption[] = [
-  { value: 'nc', label: 'National Coordinator' },
-  { value: 'ns_sg', label: 'NS Secretary General' },
-  { value: 'cabinet_chair', label: 'Cabinet Chair' },
-  { value: 'council_coord', label: 'Council Coordinator' },
-  { value: 'nat_cloud_rep', label: 'National Cloud Rep' },
-  { value: 'ns_member', label: 'NS Member' },
-  { value: 'rc', label: 'Regional Coordinator' },
-  { value: 'reg_cloud_rep', label: 'Regional Cloud Rep' },
-  { value: 'reg_special_proj', label: 'Regional Special Projects' },
-  { value: 'src', label: 'Sub-Regional Coordinator' },
-  { value: 'sr_sg', label: 'SR Secretary General' },
-  { value: 'nnc', label: 'NeighborNet Coordinator' },
-  { value: 'ct_member', label: 'Core Team Member' },
-  { value: 'member', label: 'Member' },
-  { value: 'cloud_coord', label: 'Cloud Coordinator' },
-  { value: 'cloud_member', label: 'Cloud Member' },
-  { value: 'cabinet_sg', label: 'Cabinet Secretary General' },
-  { value: 'dept_head', label: 'Department Head' },
-  { value: 'team_lead', label: 'Team Lead' },
-  { value: 'team_member', label: 'Team Member' },
-]
-
-function getRoleTitle(role: YMRoleEntry): string {
+function getRoleTitle(role: YMRoleEntry, roleOptions: ComboboxOption[]): string {
   if (role.roleTypeId) {
-    const found = YM_ROLES.find(r => r.value === role.roleTypeId)
+    const found = roleOptions.find(r => r.value === role.roleTypeId)
     return found?.label ?? role.roleTypeId
   }
   if (role.roleTypeCustom) {
@@ -86,21 +63,28 @@ export function YMRolesSection({
 }: YMRolesSectionProps) {
   const { isEditable } = useProfileMode()
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [roleOptions, setRoleOptions] = useState<ComboboxOption[]>([])
   const [amirOptions, setAmirOptions] = useState<ComboboxOption[]>([])
 
   useEffect(() => {
-    async function loadAmirs() {
-      const { data } = await fetchAllUsersForSelection()
-      if (data) {
-        setAmirOptions(data)
+    async function loadOptions() {
+      const [rolesResult, usersResult] = await Promise.all([
+        fetchRoleTypes(),
+        fetchAllUsersForSelection(),
+      ])
+      if (rolesResult.data) {
+        setRoleOptions(rolesResult.data.map(rt => ({ value: rt.id, label: rt.name })))
+      }
+      if (usersResult.data) {
+        setAmirOptions(usersResult.data)
       }
     }
-    loadAmirs()
+    loadOptions()
   }, [])
 
   const getRoleComboboxValue = (role: YMRoleEntry): ComboboxValue | undefined => {
     if (role.roleTypeId) {
-      const option = YM_ROLES.find(r => r.value === role.roleTypeId)
+      const option = roleOptions.find(r => r.value === role.roleTypeId)
       return { type: 'existing', value: role.roleTypeId, label: option?.label }
     }
     if (role.roleTypeCustom) {
@@ -170,7 +154,7 @@ export function YMRolesSection({
         <ExpandableCard
           key={role.id}
           id={role.id}
-          title={getRoleTitle(role)}
+          title={getRoleTitle(role, roleOptions)}
           subtitle={getRoleSubtitle(role)}
           badge={role.isCurrent ? 'Current' : undefined}
           isExpanded={expandedId === role.id}
@@ -182,7 +166,7 @@ export function YMRolesSection({
               <div className="space-y-1.5">
                 <Label>Role</Label>
                 <SearchableCombobox
-                  options={YM_ROLES}
+                  options={roleOptions}
                   value={getRoleComboboxValue(role)}
                   onChange={(value) => handleRoleTypeChange(index, value)}
                   placeholder="Select or add a role"
