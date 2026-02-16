@@ -42,11 +42,11 @@ export function YMLoginForm({ onSuccess, onError, error }: YMLoginFormProps) {
       {/* Footer */}
       <div className="text-balance text-center text-xs text-muted-foreground">
         By clicking continue, you agree to our{' '}
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <a href="/legal-lol" className="underline underline-offset-4 hover:text-primary">
           Terms of Service
         </a>{' '}
         and{' '}
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <a href="/legal-lol" className="underline underline-offset-4 hover:text-primary">
           Privacy Policy
         </a>.
       </div>
