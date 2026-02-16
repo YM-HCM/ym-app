@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { UserX } from 'lucide-react'
+import { UserX, Loader2 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -63,6 +63,7 @@ export function YMRolesSection({
 }: YMRolesSectionProps) {
   const { isEditable } = useProfileMode()
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [optionsLoaded, setOptionsLoaded] = useState(false)
   const [roleOptions, setRoleOptions] = useState<ComboboxOption[]>([])
   const [amirOptions, setAmirOptions] = useState<ComboboxOption[]>([])
 
@@ -78,6 +79,7 @@ export function YMRolesSection({
       if (usersResult.data) {
         setAmirOptions(usersResult.data)
       }
+      setOptionsLoaded(true)
     }
     loadOptions()
   }, [])
@@ -141,6 +143,22 @@ export function YMRolesSection({
       <p className="text-sm text-muted-foreground">No roles added yet</p>
     </div>
   )
+
+  if (!optionsLoaded) {
+    return (
+      <section className="space-y-5">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">YM Roles</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {isEditable ? "Your positions and responsibilities in the organization" : "Positions and responsibilities in the organization"}
+          </p>
+        </div>
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      </section>
+    )
+  }
 
   return (
     <ExpandableCardList
