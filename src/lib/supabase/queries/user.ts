@@ -29,32 +29,31 @@ export async function fetchUserContext(userId: string): Promise<UserContext | nu
     return null
   }
 
-  // Fetch active role assignments with role types
-  const { data: roleAssignments } = await supabase
-    .from('role_assignments')
-    .select(`
-      *,
-      role_types (*)
-    `)
-    .eq('user_id', user.id)
-    .eq('is_active', true)
-
-  // Fetch active membership with geographic info
-  // Use maybeSingle() instead of single() to gracefully handle users without memberships
-  const { data: membership, error: membershipError } = await supabase
-    .from('memberships')
-    .select(`
-      *,
-      neighbor_nets (
-        name,
-        subregions (
-          name
+  // Fetch role assignments and membership in parallel (independent queries)
+  const [{ data: roleAssignments }, { data: membership, error: membershipError }] = await Promise.all([
+    supabase
+      .from('role_assignments')
+      .select(`
+        *,
+        role_types (*)
+      `)
+      .eq('user_id', user.id)
+      .eq('is_active', true),
+    supabase
+      .from('memberships')
+      .select(`
+        *,
+        neighbor_nets (
+          name,
+          subregions (
+            name
+          )
         )
-      )
-    `)
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .maybeSingle()
+      `)
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle(),
+  ])
 
   // Log non-PGRST116 errors (PGRST116 is "no rows found" which is expected)
   if (membershipError && membershipError.code !== 'PGRST116') {

@@ -58,36 +58,38 @@ export async function fetchPeopleForDirectory(): Promise<PersonListItem[]> {
 
   const userIds = users.map((u) => u.id)
 
-  // Fetch role assignments for these users
-  const { data: roleAssignments, error: rolesError } = await supabase
-    .from('role_assignments')
-    .select(`
-      *,
-      role_types (*)
-    `)
-    .in('user_id', userIds)
-    .eq('is_active', true)
+  // Fetch role assignments and memberships in parallel (independent queries)
+  const [
+    { data: roleAssignments, error: rolesError },
+    { data: memberships, error: membershipsError },
+  ] = await Promise.all([
+    supabase
+      .from('role_assignments')
+      .select(`
+        *,
+        role_types (*)
+      `)
+      .in('user_id', userIds)
+      .eq('is_active', true),
+    supabase
+      .from('memberships')
+      .select(`
+        *,
+        neighbor_nets (
+          *,
+          subregions (
+            *,
+            regions (*)
+          )
+        )
+      `)
+      .in('user_id', userIds)
+      .eq('status', 'active'),
+  ])
 
   if (rolesError) {
     console.error('Error fetching role assignments:', rolesError)
   }
-
-  // Fetch memberships for these users
-  const { data: memberships, error: membershipsError } = await supabase
-    .from('memberships')
-    .select(`
-      *,
-      neighbor_nets (
-        *,
-        subregions (
-          *,
-          regions (*)
-        )
-      )
-    `)
-    .in('user_id', userIds)
-    .eq('status', 'active')
-
   if (membershipsError) {
     console.error('Error fetching memberships:', membershipsError)
   }
@@ -145,11 +147,12 @@ export async function fetchPeopleForDirectory(): Promise<PersonListItem[]> {
 export async function fetchFilterCategories(): Promise<FilterCategories> {
   const supabase = await createClient()
 
-  const [regionsRes, subregionsRes, neighborNetsRes, roleTypesRes] = await Promise.all([
+  const [regionsRes, subregionsRes, neighborNetsRes, roleTypesRes, usersSkillsRes] = await Promise.all([
     supabase.from('regions').select('id, name').eq('is_active', true).order('name'),
     supabase.from('subregions').select('id, name').eq('is_active', true).order('name'),
     supabase.from('neighbor_nets').select('id, name').eq('is_active', true).order('name'),
     supabase.from('role_types').select('id, name').order('name'),
+    supabase.from('users').select('skills').not('onboarding_completed_at', 'is', null),
   ])
 
   // Log any errors from filter queries
@@ -157,15 +160,11 @@ export async function fetchFilterCategories(): Promise<FilterCategories> {
   if (subregionsRes.error) console.error('Error fetching subregions:', subregionsRes.error)
   if (neighborNetsRes.error) console.error('Error fetching neighbor_nets:', neighborNetsRes.error)
   if (roleTypesRes.error) console.error('Error fetching role_types:', roleTypesRes.error)
+  if (usersSkillsRes.error) console.error('Error fetching user skills:', usersSkillsRes.error)
 
-  // Get unique skills from users
-  const { data: users } = await supabase
-    .from('users')
-    .select('skills')
-    .not('onboarding_completed_at', 'is', null)
-
+  // Build unique skills list
   const skillSet = new Set<string>()
-  users?.forEach((u) => {
+  usersSkillsRes.data?.forEach((u) => {
     u.skills?.forEach((skill) => skillSet.add(skill))
   })
   const skills = Array.from(skillSet)
