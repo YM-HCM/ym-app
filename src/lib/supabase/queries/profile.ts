@@ -5,8 +5,10 @@ import type { YMRoleEntry, YMProjectEntry, EducationEntry, EducationLevel } from
 
 // Type aliases for cleaner code
 type RoleAssignment = Tables<'role_assignments'>
-type RoleAssignmentWithType = RoleAssignment & { role_types: { name: string } | null }
 type UserProject = Tables<'user_projects'>
+type AmirUser = { first_name: string | null; last_name: string | null }
+type RoleAssignmentJoined = RoleAssignment & { role_types: { name: string } | null; amir_user: AmirUser | null }
+type UserProjectJoined = UserProject & { amir_user: AmirUser | null }
 
 // Education entry stored as JSONB in users table
 interface EducationJson {
@@ -38,19 +40,25 @@ function parseDateToLocal(dateStr: string | null | undefined): Date | undefined 
   return new Date(year, month, day)
 }
 
+function formatAmirName(amir: AmirUser | null): string | undefined {
+  if (!amir) return undefined
+  const name = `${amir.first_name || ''} ${amir.last_name || ''}`.trim()
+  return name || undefined
+}
+
 // Transform role assignments from DB to form format
-function transformRoles(roles: RoleAssignmentWithType[]): YMRoleEntry[] {
+function transformRoles(roles: RoleAssignmentJoined[]): YMRoleEntry[] {
   return roles.map((role) => {
     const startParsed = parseDateString(role.start_date)
     const endParsed = parseDateString(role.end_date)
-    const roleType = role.role_types as { name: string } | null
 
     return {
       id: role.id,
       roleTypeId: role.role_type_id ?? undefined,
-      roleTypeName: roleType?.name ?? undefined,
+      roleTypeName: (role.role_types as { name: string } | null)?.name ?? undefined,
       roleTypeCustom: role.role_type_custom ?? undefined,
       amirUserId: role.amir_user_id ?? undefined,
+      amirUserName: formatAmirName(role.amir_user as AmirUser | null),
       amirCustomName: role.amir_custom_name ?? undefined,
       startMonth: startParsed?.month,
       startYear: startParsed?.year,
@@ -63,13 +71,14 @@ function transformRoles(roles: RoleAssignmentWithType[]): YMRoleEntry[] {
 }
 
 // Transform user projects from DB to form format
-function transformProjects(projects: UserProject[]): YMProjectEntry[] {
+function transformProjects(projects: UserProjectJoined[]): YMProjectEntry[] {
   return projects.map((project) => ({
     id: project.id,
     projectType: project.project_type ?? undefined,
     projectTypeCustom: project.project_type_custom ?? undefined,
     role: project.role ?? undefined,
     amirUserId: project.amir_user_id ?? undefined,
+    amirUserName: formatAmirName(project.amir_user as AmirUser | null),
     amirCustomName: project.amir_custom_name ?? undefined,
     startMonth: project.start_month ?? undefined,
     startYear: project.start_year ?? undefined,
@@ -125,12 +134,12 @@ export async function fetchUserProfileById(userId: string): Promise<{
     const [rolesResult, projectsResult, membershipResult] = await Promise.all([
       supabase
         .from('role_assignments')
-        .select('*, role_types(name)')
+        .select('*, role_types(name), amir_user:users!role_assignments_amir_user_id_fkey(first_name, last_name)')
         .eq('user_id', user.id)
         .order('start_date', { ascending: false }),
       supabase
         .from('user_projects')
-        .select('*')
+        .select('*, amir_user:users!user_projects_amir_user_id_fkey(first_name, last_name)')
         .eq('user_id', user.id)
         .order('start_year', { ascending: false }),
       supabase
@@ -181,8 +190,8 @@ export async function fetchUserProfileById(userId: string): Promise<{
       dateOfBirth: parseDateToLocal(user.date_of_birth),
       subregionId,
       neighborNetId,
-      ymRoles: transformRoles((rolesResult.data ?? []) as RoleAssignmentWithType[]),
-      ymProjects: transformProjects(projectsResult.data ?? []),
+      ymRoles: transformRoles((rolesResult.data ?? []) as RoleAssignmentJoined[]),
+      ymProjects: transformProjects((projectsResult.data ?? []) as UserProjectJoined[]),
       educationLevel: (user.education_level as EducationLevel) ?? undefined,
       education: transformEducation((user.education ?? []) as EducationJson[]),
       skills: user.skills ?? [],

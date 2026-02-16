@@ -85,7 +85,10 @@ export function YMProjectsSection({
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [amirOptions, setAmirOptions] = useState<ComboboxOption[]>([])
 
+  // Only fetch dropdown options in edit mode — read-only uses pre-resolved names from the query
   useEffect(() => {
+    if (!isEditable) return
+
     async function loadAmirs() {
       const { data } = await fetchAllUsersForSelection()
       if (data) {
@@ -93,7 +96,7 @@ export function YMProjectsSection({
       }
     }
     loadAmirs()
-  }, [])
+  }, [isEditable])
 
   const getProjectComboboxValue = (project: YMProjectEntry): ComboboxValue | undefined => {
     if (project.projectType) {
@@ -138,6 +141,9 @@ export function YMProjectsSection({
   }
 
   const getAmirDisplay = (project: YMProjectEntry): string => {
+    if (project.amirUserName) {
+      return project.amirUserName
+    }
     if (project.amirUserId) {
       const option = amirOptions.find(a => a.value === project.amirUserId)
       return option?.label || project.amirUserId

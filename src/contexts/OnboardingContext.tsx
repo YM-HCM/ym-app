@@ -20,6 +20,7 @@ export interface YMRoleEntry {
   roleTypeName?: string
   roleTypeCustom?: string
   amirUserId?: string
+  amirUserName?: string
   amirCustomName?: string
   startMonth?: number
   startYear?: number
@@ -36,6 +37,7 @@ export interface YMProjectEntry {
   projectTypeCustom?: string
   role?: string
   amirUserId?: string
+  amirUserName?: string
   amirCustomName?: string
   startMonth?: number
   startYear?: number

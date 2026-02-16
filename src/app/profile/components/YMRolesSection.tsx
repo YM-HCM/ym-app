@@ -133,6 +133,9 @@ export function YMRolesSection({
   }
 
   const getAmirDisplay = (role: YMRoleEntry): string => {
+    if (role.amirUserName) {
+      return role.amirUserName
+    }
     if (role.amirUserId) {
       const option = amirOptions.find(a => a.value === role.amirUserId)
       return option?.label || role.amirUserId
