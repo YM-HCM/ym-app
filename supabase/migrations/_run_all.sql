@@ -1,7 +1,7 @@
 -- ============================================
 -- COMBINED MIGRATION SCRIPT
 -- Run this in Supabase SQL Editor to set up the entire schema
--- Generated: January 2026
+-- Generated: February 2026
 -- ============================================
 
 -- ============================================
@@ -138,7 +138,8 @@ CREATE TABLE memberships (
   updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   CONSTRAINT membership_location CHECK (
     (neighbor_net_id IS NOT NULL AND region_id IS NULL) OR
-    (neighbor_net_id IS NULL AND region_id IS NOT NULL)
+    (neighbor_net_id IS NULL AND region_id IS NOT NULL) OR
+    (neighbor_net_id IS NULL AND region_id IS NULL)
   )
 );
 

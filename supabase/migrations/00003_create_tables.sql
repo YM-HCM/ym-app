@@ -129,7 +129,8 @@ CREATE TABLE memberships (
   -- Constraints
   CONSTRAINT membership_location CHECK (
     (neighbor_net_id IS NOT NULL AND region_id IS NULL) OR
-    (neighbor_net_id IS NULL AND region_id IS NOT NULL)
+    (neighbor_net_id IS NULL AND region_id IS NOT NULL) OR
+    (neighbor_net_id IS NULL AND region_id IS NULL)
   )
 );
 
