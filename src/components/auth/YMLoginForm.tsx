@@ -29,7 +29,7 @@ export function YMLoginForm({ onSuccess, onError, error }: YMLoginFormProps) {
                 />
               </div>
             </div>
-            <h1 className="text-xl font-bold">Welcome to Young Muslims App</h1>
+            <h1 className="text-xl font-bold text-center">Welcome to <br className="sm:hidden" />Young Muslims App</h1>
           </div>
 
           {/* Google Sign In Button - Full Width & Centered */}

@@ -15,6 +15,7 @@ const FUSE_OPTIONS: IFuseOptions<PersonListItem> = {
     { name: 'region.name', weight: 1 },
     { name: 'subregion.name', weight: 1 },
     { name: 'skills', weight: 1 },
+    { name: 'email', weight: 1.5 },
   ],
 }
 

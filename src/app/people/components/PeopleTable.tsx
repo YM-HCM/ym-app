@@ -77,9 +77,16 @@ export function PeopleTable({ people }: PeopleTableProps) {
                   {initials}
                 </div>
               )}
-              <span className="font-medium">
-                {person.firstName} {person.lastName}
-              </span>
+              <div>
+                <span className="font-medium">
+                  {person.firstName} {person.lastName}
+                </span>
+                {!person.isClaimed && (
+                  <span className="ml-2 text-xs text-muted-foreground/60 italic">
+                    Not yet joined
+                  </span>
+                )}
+              </div>
             </div>
           )
         },
@@ -212,9 +219,12 @@ export function PeopleTable({ people }: PeopleTableProps) {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row) => {
-              const handleRowClick = () => router.push(`/people/${row.original.id}`)
+              const isClaimed = row.original.isClaimed
+              const handleRowClick = () => {
+                if (isClaimed) router.push(`/people/${row.original.id}`)
+              }
               const handleRowKeyDown = (e: KeyboardEvent<HTMLTableRowElement>) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && isClaimed) {
                   e.preventDefault()
                   handleRowClick()
                 }
@@ -222,12 +232,12 @@ export function PeopleTable({ people }: PeopleTableProps) {
               return (
                 <TableRow
                   key={row.id}
-                  onClick={handleRowClick}
-                  onKeyDown={handleRowKeyDown}
-                  tabIndex={0}
-                  role="link"
-                  aria-label={`View profile of ${row.original.firstName} ${row.original.lastName}`}
-                  className="cursor-pointer focus:outline-none focus-visible:bg-muted/50"
+                  onClick={isClaimed ? handleRowClick : undefined}
+                  onKeyDown={isClaimed ? handleRowKeyDown : undefined}
+                  tabIndex={isClaimed ? 0 : -1}
+                  role={isClaimed ? 'link' : undefined}
+                  aria-label={isClaimed ? `View profile of ${row.original.firstName} ${row.original.lastName}` : undefined}
+                  className={isClaimed ? 'cursor-pointer focus:outline-none focus-visible:bg-muted/50' : 'opacity-60'}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

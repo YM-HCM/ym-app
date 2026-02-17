@@ -38,15 +38,21 @@ export function PersonCard({ person }: PersonCardProps) {
 
   return (
     <Card
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="link"
-      aria-label={`View profile of ${person.firstName} ${person.lastName}`}
-      className="group relative h-full cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/20 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      onClick={person.isClaimed ? handleClick : undefined}
+      onKeyDown={person.isClaimed ? handleKeyDown : undefined}
+      tabIndex={person.isClaimed ? 0 : -1}
+      role={person.isClaimed ? 'link' : undefined}
+      aria-label={person.isClaimed ? `View profile of ${person.firstName} ${person.lastName}` : undefined}
+      className={`group relative h-full overflow-hidden transition-all duration-200 ${
+        person.isClaimed
+          ? 'cursor-pointer hover:shadow-lg hover:scale-[1.02] hover:border-primary/20 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
+          : 'opacity-60'
+      }`}
     >
-      {/* Subtle gradient overlay on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+      {/* Subtle gradient overlay on hover — only for claimed users */}
+      {person.isClaimed && (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+      )}
 
       <div className="relative p-6">
         {/* Header: Avatar + Name + Location */}
@@ -69,17 +75,17 @@ export function PersonCard({ person }: PersonCardProps) {
 
           {/* Name and Location */}
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+            <h3 className={`font-semibold text-foreground truncate ${person.isClaimed ? 'group-hover:text-primary transition-colors' : ''}`}>
               {person.firstName} {person.lastName}
             </h3>
             <p className="text-sm text-muted-foreground truncate">
-              {location}
+              {person.isClaimed ? location : person.email}
             </p>
           </div>
         </div>
 
-        {/* Roles */}
-        {person.roles.length > 0 && (
+        {/* Roles — only for claimed users */}
+        {person.isClaimed && person.roles.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {person.roles.map((role) => (
               <Badge
@@ -93,14 +99,21 @@ export function PersonCard({ person }: PersonCardProps) {
           </div>
         )}
 
-        {/* Skills */}
-        {person.skills.length > 0 && (
+        {/* Skills — only for claimed users */}
+        {person.isClaimed && person.skills.length > 0 && (
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Tag className="h-3 w-3 opacity-60" />
             <span className="truncate">
               {person.skills.slice(0, 3).join(' • ')}
             </span>
           </div>
+        )}
+
+        {/* Unclaimed indicator */}
+        {!person.isClaimed && (
+          <p className="text-xs text-muted-foreground/60 italic">
+            Not yet joined
+          </p>
         )}
       </div>
     </Card>
