@@ -20,6 +20,7 @@ export interface PersonListItem {
   roles: { id: string; name: string; category: string }[]
   skills: string[]
   yearsInYM?: number
+  isClaimed: boolean
 }
 
 export interface FilterOption {
@@ -41,11 +42,11 @@ export interface FilterCategories {
 export async function fetchPeopleForDirectory(): Promise<PersonListItem[]> {
   const supabase = await createClient()
 
-  // Fetch users who have completed onboarding
+  // Fetch all users — claimed (onboarded) users first, then unclaimed
   const { data: users, error: usersError } = await supabase
     .from('users')
     .select('*')
-    .not('onboarding_completed_at', 'is', null)
+    .order('claimed_at', { ascending: false, nullsFirst: false })
 
   if (usersError) {
     console.error('Error fetching users:', usersError)
@@ -137,6 +138,7 @@ export async function fetchPeopleForDirectory(): Promise<PersonListItem[]> {
       roles,
       skills: user.skills || [],
       yearsInYM,
+      isClaimed: user.claimed_at !== null,
     }
   })
 }
@@ -151,7 +153,7 @@ export async function fetchFilterCategories(): Promise<FilterCategories> {
     supabase.from('regions').select('id, name').eq('is_active', true).order('name'),
     supabase.from('subregions').select('id, name').eq('is_active', true).order('name'),
     supabase.from('neighbor_nets').select('id, name').eq('is_active', true).order('name'),
-    supabase.from('role_types').select('id, name').order('name'),
+    supabase.from('role_types').select('id, name').order('sort_order'),
     supabase.from('users').select('skills').not('onboarding_completed_at', 'is', null),
   ])
 

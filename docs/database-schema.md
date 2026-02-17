@@ -162,6 +162,7 @@
 │  │ scope_type       scope_type         (see enums below)                │    │
 │  │ max_per_scope    INTEGER            (NULL = unlimited)               │    │
 │  │ description      TEXT                                                │    │
+│  │ sort_order       INTEGER NOT NULL   (hierarchy ordering for UI)      │    │
 │  │ created_at       TIMESTAMPTZ                                         │    │
 │  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                              │
@@ -299,15 +300,15 @@ CREATE TYPE scope_type AS ENUM (
 | Regional Cloud Rep | reg_cloud_rep | regional | region | 1 |
 | Regional Special Projects | reg_special_proj | regional | region | 1 |
 | Sub-Regional Coordinator | src | subregional | subregion | 1 |
-| SR Secretary General | sr_sg | subregional | subregion | 1 |
+| Sub-Regional Secretary General | sr_sg | subregional | subregion | 1 |
 | NeighborNet Coordinator | nnc | neighbor_net | neighbor_net | 1 |
 | Core Team Member | ct_member | neighbor_net | neighbor_net | NULL |
 | Cloud Coordinator | cloud_coord | cloud | subregion | 1 |
 | Cloud Member | cloud_member | cloud | subregion | NULL |
 | Cabinet Secretary General | cabinet_sg | cabinet | national | 1 |
 | Department Head | dept_head | cabinet | department | 1 |
-| Team Lead | team_lead | cabinet | team | 1 |
-| Team Member | team_member | cabinet | team | NULL |
+| Cabinet Team Lead | team_lead | cabinet | team | 1 |
+| Cabinet Team Member | team_member | cabinet | team | NULL |
 
 ---
 

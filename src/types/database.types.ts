@@ -241,6 +241,7 @@ export type Database = {
           max_per_scope: number | null
           name: string
           scope_type: Database["public"]["Enums"]["scope_type"]
+          sort_order: number
         }
         Insert: {
           category: Database["public"]["Enums"]["role_category"]
@@ -251,6 +252,7 @@ export type Database = {
           max_per_scope?: number | null
           name: string
           scope_type: Database["public"]["Enums"]["scope_type"]
+          sort_order?: number
         }
         Update: {
           category?: Database["public"]["Enums"]["role_category"]
@@ -261,6 +263,7 @@ export type Database = {
           max_per_scope?: number | null
           name?: string
           scope_type?: Database["public"]["Enums"]["scope_type"]
+          sort_order?: number
         }
         Relationships: []
       }

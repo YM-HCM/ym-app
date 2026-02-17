@@ -7,6 +7,7 @@ export interface RoleType {
   category: string
   scope_type: string
   description: string | null
+  sort_order: number
 }
 
 /**
@@ -21,8 +22,8 @@ export async function fetchRoleTypes(): Promise<{
 
     const { data, error } = await supabase
       .from('role_types')
-      .select('id, name, code, category, scope_type, description')
-      .order('name')
+      .select('id, name, code, category, scope_type, description, sort_order')
+      .order('sort_order')
 
     if (error) {
       console.error('Error fetching role types:', error)
