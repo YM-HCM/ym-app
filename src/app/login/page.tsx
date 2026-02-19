@@ -59,6 +59,8 @@ export default function LoginPage() {
   }
 
   return (
+    <>
+    <title>Login | Young Muslims App</title>
     <div className="login-bg min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
       <div className="login-orb login-orb-1" />
       <div className="login-orb login-orb-2" />
@@ -70,5 +72,6 @@ export default function LoginPage() {
         />
       </div>
     </div>
+    </>
   )
 }

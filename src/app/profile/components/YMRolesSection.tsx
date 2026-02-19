@@ -66,9 +66,14 @@ export function YMRolesSection({
 }: YMRolesSectionProps) {
   const { isEditable } = useProfileMode()
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [optionsLoaded, setOptionsLoaded] = useState(!isEditable)
-  const [roleOptions, setRoleOptions] = useState<ComboboxOption[]>([])
-  const [amirOptions, setAmirOptions] = useState<ComboboxOption[]>([])
+  const [dropdownState, setDropdownState] = useState<{
+    roleOptions: ComboboxOption[]
+    amirOptions: ComboboxOption[]
+    loaded: boolean
+  }>({ roleOptions: [], amirOptions: [], loaded: !isEditable })
+
+  const { roleOptions, amirOptions } = dropdownState
+  const optionsLoaded = dropdownState.loaded
 
   // Only fetch dropdown options in edit mode — read-only uses pre-resolved names from the query
   useEffect(() => {
@@ -79,13 +84,11 @@ export function YMRolesSection({
         fetchRoleTypes(),
         fetchAllUsersForSelection(),
       ])
-      if (rolesResult.data) {
-        setRoleOptions(rolesResult.data.map(rt => ({ value: rt.id, label: rt.name })))
-      }
-      if (usersResult.data) {
-        setAmirOptions(usersResult.data)
-      }
-      setOptionsLoaded(true)
+      setDropdownState({
+        roleOptions: rolesResult.data?.map(rt => ({ value: rt.id, label: rt.name })) ?? [],
+        amirOptions: usersResult.data ?? [],
+        loaded: true,
+      })
     }
     loadOptions()
   }, [isEditable])

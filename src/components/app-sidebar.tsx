@@ -216,9 +216,11 @@ export function AppSidebar() {
                 >
                   {/* Avatar - 24px to match logo size in lg variant buttons */}
                   {user?.user_metadata?.avatar_url ? (
-                    <img
+                    <Image
                       src={user.user_metadata.avatar_url}
                       alt={capitalizedName}
+                      width={24}
+                      height={24}
                       className="size-6 shrink-0 rounded-full object-cover"
                       referrerPolicy="no-referrer"
                     />

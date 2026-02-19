@@ -24,8 +24,8 @@ export function ProfileSkeleton() {
       {/* Content skeletons - 5 sections */}
       <main className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-2xl space-y-12">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="space-y-4">
+          {[1, 2, 3, 4, 5].map((section) => (
+            <div key={`skeleton-section-${section}`} className="space-y-4">
               <Skeleton className="h-6 w-48" />
               <Skeleton className="h-4 w-64" />
               <div className="grid gap-4 sm:grid-cols-2">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Calendar as CalendarIcon, Globe, Mail, Phone } from "lucide-react"
 import { format } from "date-fns"
@@ -67,13 +67,28 @@ export default function PersonalInfo() {
   const [ethnicity, setEthnicity] = useState(data.ethnicity ?? "")
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(data.dateOfBirth)
 
-  // Sync state when data loads from Supabase (pre-fill)
-  useEffect(() => {
+  // Sync state when data loads from Supabase (in-render adjustment instead of useEffect)
+  const [prevData, setPrevData] = useState({
+    phoneNumber: data.phoneNumber,
+    personalEmail: data.personalEmail,
+    ethnicity: data.ethnicity,
+    dateOfBirth: data.dateOfBirth,
+  })
+  if (data.phoneNumber !== prevData.phoneNumber ||
+      data.personalEmail !== prevData.personalEmail ||
+      data.ethnicity !== prevData.ethnicity ||
+      data.dateOfBirth !== prevData.dateOfBirth) {
+    setPrevData({
+      phoneNumber: data.phoneNumber,
+      personalEmail: data.personalEmail,
+      ethnicity: data.ethnicity,
+      dateOfBirth: data.dateOfBirth,
+    })
     if (data.phoneNumber) setPhoneNumber(data.phoneNumber)
     if (data.personalEmail) setPersonalEmail(data.personalEmail)
     if (data.ethnicity) setEthnicity(data.ethnicity)
     if (data.dateOfBirth) setDateOfBirth(data.dateOfBirth)
-  }, [data.phoneNumber, data.personalEmail, data.ethnicity, data.dateOfBirth])
+  }
 
   // Track which fields have been touched (blurred)
   const [touched, setTouched] = useState({

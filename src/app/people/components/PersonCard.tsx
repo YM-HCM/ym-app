@@ -2,6 +2,7 @@
 
 import type { KeyboardEvent } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tag } from 'lucide-react'
@@ -59,9 +60,11 @@ export function PersonCard({ person }: PersonCardProps) {
         <div className="flex items-start gap-4 mb-4">
           {/* Avatar */}
           {person.avatarUrl ? (
-            <img
+            <Image
               src={person.avatarUrl}
               alt={`${person.firstName} ${person.lastName}`}
+              width={48}
+              height={48}
               className="h-12 w-12 rounded-full object-cover ring-2 ring-background shadow-sm"
               referrerPolicy="no-referrer"
             />

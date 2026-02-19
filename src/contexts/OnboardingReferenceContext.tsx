@@ -17,18 +17,17 @@ interface OnboardingReferenceData {
 const OnboardingReferenceContext = createContext<OnboardingReferenceData | undefined>(undefined)
 
 export function OnboardingReferenceProvider({ children }: { children: ReactNode }) {
-  const [subregions, setSubregions] = useState<Subregion[]>([])
-  const [neighborNets, setNeighborNets] = useState<NeighborNet[]>([])
-  const [roleTypes, setRoleTypes] = useState<RoleType[]>([])
-  const [users, setUsers] = useState<UserOption[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [state, setState] = useState<OnboardingReferenceData>({
+    subregions: [],
+    neighborNets: [],
+    roleTypes: [],
+    users: [],
+    isLoading: true,
+    error: null,
+  })
 
   useEffect(() => {
     const loadAll = async () => {
-      setIsLoading(true)
-      setError(null)
-
       const [subregionsResult, neighborNetsResult, roleTypesResult, usersResult] = await Promise.all([
         fetchSubregions(),
         fetchAllNeighborNets(),
@@ -37,42 +36,28 @@ export function OnboardingReferenceProvider({ children }: { children: ReactNode 
       ])
 
       // Check for critical errors (subregions and roleTypes are required)
-      if (subregionsResult.error) {
-        setError(subregionsResult.error)
-        setIsLoading(false)
-        return
-      }
-      if (neighborNetsResult.error) {
-        setError(neighborNetsResult.error)
-        setIsLoading(false)
-        return
-      }
-      if (roleTypesResult.error) {
-        setError(roleTypesResult.error)
-        setIsLoading(false)
+      const criticalError = subregionsResult.error ?? neighborNetsResult.error ?? roleTypesResult.error
+      if (criticalError) {
+        setState(prev => ({ ...prev, error: criticalError, isLoading: false }))
         return
       }
 
-      setSubregions(subregionsResult.data || [])
-      setNeighborNets(neighborNetsResult.data || [])
-      setRoleTypes(roleTypesResult.data || [])
-      // Users can be empty (no one completed onboarding yet) — that's OK
-      setUsers(usersResult.data || [])
-      setIsLoading(false)
+      setState({
+        subregions: subregionsResult.data || [],
+        neighborNets: neighborNetsResult.data || [],
+        roleTypes: roleTypesResult.data || [],
+        // Users can be empty (no one completed onboarding yet) — that's OK
+        users: usersResult.data || [],
+        isLoading: false,
+        error: null,
+      })
     }
 
     loadAll()
   }, [])
 
   return (
-    <OnboardingReferenceContext.Provider value={{
-      subregions,
-      neighborNets,
-      roleTypes,
-      users,
-      isLoading,
-      error,
-    }}>
+    <OnboardingReferenceContext.Provider value={state}>
       {children}
     </OnboardingReferenceContext.Provider>
   )

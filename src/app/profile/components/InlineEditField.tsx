@@ -75,12 +75,13 @@ export function InlineEditField(props: InlineEditFieldProps) {
     }
   }, [isEditing])
 
-  // Reset temp value when props change
+  // Reset temp value when props change (in-render adjustment instead of useEffect)
   const propsValue = props.value
-  const propsType = props.type
-  useEffect(() => {
-    setTempValue(propsType === 'date' ? propsValue : propsValue)
-  }, [propsValue, propsType])
+  const [prevPropsValue, setPrevPropsValue] = useState(propsValue)
+  if (propsValue !== prevPropsValue) {
+    setPrevPropsValue(propsValue)
+    setTempValue(propsValue)
+  }
 
   // Handle click outside to confirm/blur
   useEffect(() => {

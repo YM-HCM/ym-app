@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { User, ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ProfileModeProvider } from '@/contexts/ProfileModeContext'
@@ -122,6 +123,7 @@ export default function ProfilePage() {
 
   return (
     <ProfileModeProvider isEditable={true}>
+      <title>My Profile | Young Muslims App</title>
       <div className="flex min-h-screen flex-col bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -138,9 +140,11 @@ export default function ProfilePage() {
 
           <div className="flex items-center gap-3">
             {profileData?.avatarUrl ? (
-              <img
+              <Image
                 src={profileData.avatarUrl}
                 alt={`${profileData.firstName ?? ''} ${profileData.lastName ?? ''}`}
+                width={40}
+                height={40}
                 className="h-10 w-10 rounded-full object-cover"
                 referrerPolicy="no-referrer"
               />

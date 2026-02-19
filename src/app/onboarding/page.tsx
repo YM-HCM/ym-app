@@ -14,6 +14,16 @@ import Step5Education from "./step5-education"
 import Step6Skills from "./step6-skills"
 import Step7Complete from "./step7-complete"
 
+const STEP_COMPONENTS: Record<number, React.ComponentType> = {
+  1: Step1PersonalInfo,
+  2: Step2Location,
+  3: Step3YmRoles,
+  4: Step4YmProjects,
+  5: Step5Education,
+  6: Step6Skills,
+  7: Step7Complete,
+}
+
 function OnboardingContent() {
   const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(1)
@@ -28,33 +38,15 @@ function OnboardingContent() {
     }
   }, [searchParams])
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <Step1PersonalInfo />
-      case 2:
-        return <Step2Location />
-      case 3:
-        return <Step3YmRoles />
-      case 4:
-        return <Step4YmProjects />
-      case 5:
-        return <Step5Education />
-      case 6:
-        return <Step6Skills />
-      case 7:
-        return <Step7Complete />
-      default:
-        return <Step1PersonalInfo />
-    }
-  }
+  const StepComponent = STEP_COMPONENTS[currentStep] ?? Step1PersonalInfo
 
-  return <>{renderStep()}</>
+  return <StepComponent />
 }
 
 export default function OnboardingPage() {
   return (
     <OnboardingProvider>
+      <title>Onboarding | Young Muslims App</title>
       <OnboardingReferenceProvider>
         <Suspense fallback={<PageLoader />}>
           <OnboardingContent />

@@ -1,6 +1,8 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ProfileModeProvider } from '@/contexts/ProfileModeContext'
@@ -13,7 +15,7 @@ import { SkillsChipSelector } from '@/app/profile/components/SkillsChipSelector'
 import { ProfileSkeleton } from './components/ProfileSkeleton'
 import { ProfileNotFound } from './components/ProfileNotFound'
 
-export default function PersonProfilePage() {
+function PersonProfileContent() {
   const params = useParams()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -35,8 +37,13 @@ export default function PersonProfilePage() {
   // Dummy handlers for read-only mode (won't be called)
   const noop = () => {}
 
+  const displayName = personData.firstName && personData.lastName
+    ? `${personData.firstName} ${personData.lastName}`
+    : personData.googleEmail?.split('@')[0] || 'Profile'
+
   return (
     <ProfileModeProvider isEditable={false}>
+      <title>{`${displayName} | Young Muslims App`}</title>
       <div className="flex min-h-screen flex-col bg-background">
         {/* Header */}
         <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -53,9 +60,11 @@ export default function PersonProfilePage() {
 
             <div className="flex items-center gap-3">
               {personData.avatarUrl ? (
-                <img
+                <Image
                   src={personData.avatarUrl}
                   alt={`${personData.firstName ?? ''} ${personData.lastName ?? ''}`}
+                  width={40}
+                  height={40}
                   className="h-10 w-10 rounded-full object-cover ring-2 ring-background shadow-sm"
                   referrerPolicy="no-referrer"
                 />
@@ -68,9 +77,7 @@ export default function PersonProfilePage() {
               )}
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">
-                  {personData.firstName && personData.lastName
-                    ? `${personData.firstName} ${personData.lastName}`
-                    : personData.googleEmail?.split('@')[0] || 'Profile'}
+                  {displayName}
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   View profile
@@ -149,5 +156,13 @@ export default function PersonProfilePage() {
         </main>
       </div>
     </ProfileModeProvider>
+  )
+}
+
+export default function PersonProfilePage() {
+  return (
+    <Suspense fallback={<ProfileSkeleton />}>
+      <PersonProfileContent />
+    </Suspense>
   )
 }

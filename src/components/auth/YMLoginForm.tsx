@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card } from "@/components/ui/card"
@@ -51,13 +52,13 @@ export function YMLoginForm({ onSuccess, onError, error }: YMLoginFormProps) {
         {/* Footer */}
         <div className="text-balance text-center text-xs text-muted-foreground animate-[loginFadeUp_0.5s_cubic-bezier(0.16,1,0.3,1)_0.3s_both]">
           By clicking continue, you agree to our{' '}
-          <a href="/legal-lol" className="underline underline-offset-4 hover:text-primary">
+          <Link href="/legal-lol" className="underline underline-offset-4 hover:text-primary">
             Terms of Service
-          </a>{' '}
+          </Link>{' '}
           and{' '}
-          <a href="/legal-lol" className="underline underline-offset-4 hover:text-primary">
+          <Link href="/legal-lol" className="underline underline-offset-4 hover:text-primary">
             Privacy Policy
-          </a>.
+          </Link>.
         </div>
       </div>
     </Card>

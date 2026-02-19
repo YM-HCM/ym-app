@@ -58,6 +58,7 @@ export function SearchableCombobox({
 }: SearchableComboboxProps) {
   const [open, setOpen] = React.useState(false)
   const [search, setSearch] = React.useState("")
+  const listId = React.useId()
 
   // Filter options based on search, limit for performance
   const filteredOptions = React.useMemo(() => {
@@ -106,6 +107,7 @@ export function SearchableCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-controls={listId}
           disabled={disabled}
           className={cn(
             "w-full justify-between font-normal",
@@ -124,7 +126,7 @@ export function SearchableCombobox({
             value={search}
             onValueChange={setSearch}
           />
-          <CommandList>
+          <CommandList id={listId}>
             {filteredOptions.length === 0 && !allowCustom && (
               <CommandEmpty>{emptyMessage}</CommandEmpty>
             )}

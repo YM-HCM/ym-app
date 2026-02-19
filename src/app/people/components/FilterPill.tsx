@@ -16,10 +16,10 @@ export function FilterPill({ label, count, onClick, onClear }: FilterPillProps) 
       variant="secondary"
       className="h-7 pl-3 pr-1 gap-1.5 cursor-pointer hover:bg-secondary/80 transition-colors"
     >
-      <span onClick={onClick} className="flex items-center gap-1.5">
+      <button type="button" onClick={onClick} className="flex items-center gap-1.5">
         <span className="font-medium">{label}:</span>
         <span className="text-muted-foreground">{count} selected</span>
-      </span>
+      </button>
       <button
         onClick={(e) => {
           e.stopPropagation()
